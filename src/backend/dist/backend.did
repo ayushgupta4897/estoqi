@@ -1,0 +1,38 @@
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = record {name: text;};
+type ConsultationSubmission = 
+ record {
+   email: text;
+   fullName: text;
+   interest: text;
+   message: text;
+   phoneNumber: text;
+   preferredDateTime: text;
+   timestamp: int;
+ };
+type CommunityStory = 
+ record {
+   name: text;
+   story: text;
+   timestamp: int;
+   videoUrl: opt text;
+ };
+service : {
+  _initializeAccessControl: () -> ();
+  addCommunityStory: (name: text, story: text, videoUrl: opt text) -> ();
+  addConsultationSubmission: (fullName: text, email: text, phoneNumber: 
+   text, interest: text, preferredDateTime: text, message: text) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  getAllCommunityStories: () -> (vec CommunityStory) query;
+  getAllConsultationSubmissions: () -> (vec ConsultationSubmission) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  isCallerAdmin: () -> (bool) query;
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+}
