@@ -31,11 +31,18 @@ const PRINCIPLES = [
 
 /* TODO[copy/photos]: replace with the real team, with their actual photos
    and bios. Placeholders are kept human and modest by design. */
-const TEAM = [
+interface Teammate {
+  name: string;
+  role: string;
+  bio: string;
+  photo?: string;
+}
+const TEAM: Teammate[] = [
   {
     name: "Jesal",
     role: "Founder",
     bio: "Started Estoqi after a year of asking why the wash water in his own kitchen had never looked clean. Engineering background; reads more chemistry papers than is healthy.",
+    photo: "/concepts/jesal_forbes.webp",
   },
   {
     name: "TBD",
@@ -104,14 +111,13 @@ const AboutESTOQI: React.FC = () => {
 
             <div className="lg:col-span-5 reveal reveal-stagger-3">
               <div className="relative aspect-[4/5] overflow-hidden bg-ink">
-                {/* TODO[photo]: replace with Jesal's actual portrait */}
                 <img
-                  src="/concepts/ch06_the_return.webp"
-                  alt="Founder portrait placeholder, an Indian kitchen at evening light."
-                  className="absolute inset-0 w-full h-full object-cover opacity-75"
+                  src="/concepts/jesal_factory.webp"
+                  alt="Jesal, founder of Estoqi, photographed on the factory floor with stainless-steel ionization chambers being assembled and the in-house laboratory bench visible in the background."
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute bottom-3 right-3 font-mono text-[9.5px] tracking-[0.18em] uppercase text-bone/85">
-                  Portrait placeholder
+                  Bengaluru · 2026
                 </div>
               </div>
             </div>
@@ -172,9 +178,17 @@ const AboutESTOQI: React.FC = () => {
                 className={`reveal reveal-stagger-${(i % 4) + 1} bg-paper border border-stone p-6 flex flex-col`}
               >
                 <div className="relative aspect-square bg-stone-soft mb-4 overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center font-display text-ink text-[36px]" style={{ fontVariationSettings: "'opsz' 48" }}>
-                    {m.name === "TBD" ? "·" : m.name[0]}
-                  </div>
+                  {m.photo ? (
+                    <img
+                      src={m.photo}
+                      alt={`${m.name}, ${m.role}.`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center font-display text-ink text-[36px]" style={{ fontVariationSettings: "'opsz' 48" }}>
+                      {m.name === "TBD" ? "·" : m.name[0]}
+                    </div>
+                  )}
                 </div>
                 <h3 className="font-display text-ink text-[18px] leading-none">{m.name}</h3>
                 <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-vermillion mt-1">
