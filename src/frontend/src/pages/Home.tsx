@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import JourneySection from "../components/JourneySection";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
 
 /* =====================================================================
@@ -22,22 +23,22 @@ const PRODUCE_REELS = [
   {
     produce: "Tomato",
     reduction: "94% pesticides",
-    image: "/concepts/canon_stilllife.webp",
+    image: "/concepts/proof/proof_tomato.webp",
   },
   {
     produce: "Spinach",
     reduction: "96% pesticides",
-    image: "/concepts/r2_process_water.webp",
+    image: "/concepts/proof/proof_spinach.webp",
   },
   {
     produce: "Grapes",
     reduction: "88% pesticides",
-    image: "/concepts/signature_hero.webp",
+    image: "/concepts/proof/proof_grapes.webp",
   },
   {
     produce: "Coriander",
     reduction: "93% pesticides",
-    image: "/concepts/ch06_the_return.webp",
+    image: "/concepts/proof/proof_coriander.webp",
   },
 ];
 
@@ -118,7 +119,7 @@ const Home: React.FC = () => {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(180deg, rgba(2,40,89,0.42) 0%, rgba(2,40,89,0.10) 28%, rgba(2,40,89,0.10) 48%, rgba(2,40,89,0.68) 100%), linear-gradient(90deg, rgba(2,40,89,0.55) 0%, rgba(2,40,89,0.0) 42%)",
+              "linear-gradient(180deg, rgba(13,13,13,0.42) 0%, rgba(13,13,13,0.10) 28%, rgba(13,13,13,0.10) 48%, rgba(13,13,13,0.68) 100%), linear-gradient(90deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.0) 42%)",
           }}
         />
 
@@ -199,6 +200,9 @@ const Home: React.FC = () => {
           <ProduceReels />
         </div>
       </section>
+
+      {/* ────────────────────────────────────────── 3.5 · JOURNEY (watercolor) */}
+      <JourneySection />
 
       {/* ────────────────────────────────────────── 4 · BRAND FILM · OUR IKIGAI */}
       <BrandFilmSection />
@@ -400,7 +404,7 @@ const ProduceReels: React.FC = () => {
             key={r.produce}
             type="button"
             onClick={() => setIdx(i)}
-            className={`relative aspect-[4/5] overflow-hidden bg-ink text-left transition-all duration-500 ${active ? "ring-2 ring-vermillion ring-offset-2 ring-offset-bone" : "opacity-90 hover:opacity-100"}`}
+            className={`relative aspect-[4/5] overflow-hidden bg-ink text-left transition-all duration-500 ${active ? "ring-1 ring-ink ring-offset-2 ring-offset-bone" : "opacity-85 hover:opacity-100"}`}
             aria-label={`View ${r.produce} reduction`}
           >
             <img
@@ -412,7 +416,7 @@ const ProduceReels: React.FC = () => {
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(2,40,89,0.0) 0%, rgba(2,40,89,0.0) 38%, rgba(2,40,89,0.78) 100%)",
+                  "linear-gradient(180deg, rgba(13,13,13,0.0) 0%, rgba(13,13,13,0.0) 38%, rgba(13,13,13,0.78) 100%)",
               }}
             />
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-bone">

@@ -70,7 +70,7 @@ export const OKRA_PESTICIDE = {
     slug: "okra-pesticide-reduction",
     produce: "Okra",
     produceLatin: "Abelmoschus esculentus",
-    produceImage: "/concepts/r2_process_water.webp",
+    produceImage: "/concepts/specimen_okra.webp",
     kind: "pesticide-reduction" as ReportKind,
     kindLabel: "Pesticide Residue Reduction",
     description:
@@ -111,7 +111,7 @@ export const RICE_PESTICIDE = {
     slug: "white-rice-pesticide-reduction",
     produce: "White Rice",
     produceLatin: "Oryza sativa",
-    produceImage: "/concepts/canon_stilllife.webp",
+    produceImage: "/concepts/specimen_white_rice.webp",
     kind: "pesticide-reduction" as ReportKind,
     kindLabel: "Pesticide Residue Reduction",
     description:
@@ -223,7 +223,7 @@ export const BROCCOLI_NUTRITION = {
     slug: "broccoli-nutrition-enrichment",
     produce: "Broccoli",
     produceLatin: "Brassica oleracea",
-    produceImage: "/concepts/r2_process_water.webp",
+    produceImage: "/concepts/specimen_broccoli.webp",
     kind: "nutrition-enrichment" as ReportKind,
     kindLabel: "Nutrition Enrichment",
     description:
@@ -271,7 +271,7 @@ export const RED_CAPSICUM_NUTRITION = {
     slug: "red-capsicum-nutrition-enrichment",
     produce: "Red Capsicum",
     produceLatin: "Capsicum annuum",
-    produceImage: "/concepts/canon_stilllife.webp",
+    produceImage: "/concepts/specimen_bell_pepper.webp",
     kind: "nutrition-enrichment" as ReportKind,
     kindLabel: "Nutrition Enrichment",
     description:

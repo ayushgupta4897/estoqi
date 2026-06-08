@@ -90,7 +90,7 @@ const ForFoodBusinesses: React.FC = () => {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(2,40,89,0.35) 0%, rgba(2,40,89,0.0) 35%, rgba(2,40,89,0.0) 55%, rgba(2,40,89,0.6) 100%), linear-gradient(90deg, rgba(2,40,89,0.55) 0%, rgba(2,40,89,0.0) 50%)",
+              "linear-gradient(180deg, rgba(13,13,13,0.35) 0%, rgba(13,13,13,0.0) 35%, rgba(13,13,13,0.0) 55%, rgba(13,13,13,0.6) 100%), linear-gradient(90deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.0) 50%)",
           }}
         />
         <div className="relative z-10 px-6 lg:px-14 pt-24 pb-20">

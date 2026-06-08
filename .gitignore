@@ -9,3 +9,6 @@ dist/
 .superpowers/
 .review_screenshots/
 .vercel
+.assets/
+__pycache__/
+*.pyc

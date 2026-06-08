@@ -43,26 +43,26 @@ interface Specimen {
 }
 
 const SPECIMENS: Specimen[] = [
-  { slug: "tomato",      name: "Tomato",       scientific: "Solanum lycopersicum",  image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"],
+  { slug: "tomato",      name: "Tomato",       scientific: "Solanum lycopersicum",  image: "/concepts/canon_stilllife.webp",        inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"],
     reports: { pesticide: "tomato-pesticide-reduction", "shelf-life": "tomato-shelf-life" } },
-  { slug: "okra",        name: "Okra",         scientific: "Abelmoschus esculentus", image: "/concepts/r2_process_water.webp", inCategories: ["pesticide", "shelf-life", "microbial"],
+  { slug: "okra",        name: "Okra",         scientific: "Abelmoschus esculentus", image: "/concepts/specimen_okra.webp",          inCategories: ["pesticide", "shelf-life", "microbial"],
     reports: { pesticide: "okra-pesticide-reduction" } },
-  { slug: "white-rice",  name: "White Rice",   scientific: "Oryza sativa",           image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide"],
+  { slug: "white-rice",  name: "White Rice",   scientific: "Oryza sativa",           image: "/concepts/specimen_white_rice.webp",    inCategories: ["pesticide"],
     reports: { pesticide: "white-rice-pesticide-reduction" } },
-  { slug: "spinach",     name: "Spinach",      scientific: "Spinacia oleracea",      image: "/concepts/r2_process_water.webp", inCategories: ["microbial", "shelf-life", "nutrient"],
+  { slug: "spinach",     name: "Spinach",      scientific: "Spinacia oleracea",      image: "/concepts/r2_process_water.webp",       inCategories: ["microbial", "shelf-life", "nutrient"],
     reports: { microbial: "spinach-microbial-reduction" } },
-  { slug: "broccoli",    name: "Broccoli",     scientific: "Brassica oleracea",      image: "/concepts/r2_process_water.webp", inCategories: ["nutrient", "pesticide"],
+  { slug: "broccoli",    name: "Broccoli",     scientific: "Brassica oleracea",      image: "/concepts/specimen_broccoli.webp",      inCategories: ["nutrient", "pesticide"],
     reports: { nutrient: "broccoli-nutrition-enrichment" } },
-  { slug: "red-capsicum", name: "Red Capsicum", scientific: "Capsicum annuum",       image: "/concepts/canon_stilllife.webp",  inCategories: ["nutrient", "shelf-life", "microbial"],
+  { slug: "red-capsicum", name: "Red Capsicum", scientific: "Capsicum annuum",       image: "/concepts/specimen_bell_pepper.webp",   inCategories: ["nutrient", "shelf-life", "microbial"],
     reports: { nutrient: "red-capsicum-nutrition-enrichment" } },
-  { slug: "grapes",      name: "Grapes",       scientific: "Vitis vinifera",         image: "/concepts/signature_hero.webp",   inCategories: ["pesticide", "nutrient", "microbial"] },
-  { slug: "apple",       name: "Apple",        scientific: "Malus domestica",        image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide"] },
-  { slug: "coriander",   name: "Coriander",    scientific: "Coriandrum sativum",     image: "/concepts/ch06_the_return.webp",  inCategories: ["pesticide", "nutrient", "microbial"] },
-  { slug: "cucumber",    name: "Cucumber",     scientific: "Cucumis sativus",        image: "/concepts/r2_process_water.webp", inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
-  { slug: "brinjal",     name: "Brinjal",      scientific: "Solanum melongena",      image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide", "shelf-life"] },
-  { slug: "mango",       name: "Mango",        scientific: "Mangifera indica",       image: "/concepts/ch06_the_return.webp",  inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
-  { slug: "fenugreek",   name: "Fenugreek",    scientific: "Trigonella foenum",      image: "/concepts/ch06_the_return.webp",  inCategories: ["shelf-life", "nutrient"] },
-  { slug: "banana",      name: "Banana",       scientific: "Musa acuminata",         image: "/concepts/canon_stilllife.webp",  inCategories: ["shelf-life", "nutrient", "microbial"] },
+  { slug: "grapes",      name: "Grapes",       scientific: "Vitis vinifera",         image: "/concepts/specimen_grapes.webp",        inCategories: ["pesticide", "nutrient", "microbial"] },
+  { slug: "apple",       name: "Apple",        scientific: "Malus domestica",        image: "/concepts/specimen_apple.webp",         inCategories: ["pesticide"] },
+  { slug: "coriander",   name: "Coriander",    scientific: "Coriandrum sativum",     image: "/concepts/specimen_coriander.webp",     inCategories: ["pesticide", "nutrient", "microbial"] },
+  { slug: "cucumber",    name: "Cucumber",     scientific: "Cucumis sativus",        image: "/concepts/specimen_cucumber.webp",      inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
+  { slug: "brinjal",     name: "Brinjal",      scientific: "Solanum melongena",      image: "/concepts/specimen_brinjal.webp",       inCategories: ["pesticide", "shelf-life"] },
+  { slug: "mango",       name: "Mango",        scientific: "Mangifera indica",       image: "/concepts/specimen_mango.webp",         inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
+  { slug: "fenugreek",   name: "Fenugreek",    scientific: "Trigonella foenum",      image: "/concepts/specimen_fenugreek.webp",     inCategories: ["shelf-life", "nutrient"] },
+  { slug: "banana",      name: "Banana",       scientific: "Musa acuminata",         image: "/concepts/specimen_banana.webp",        inCategories: ["shelf-life", "nutrient", "microbial"] },
 ];
 
 const CASE_STUDIES = [
@@ -139,7 +139,7 @@ const ESTOQILabs: React.FC = () => {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(2,40,89,0.4) 0%, rgba(2,40,89,0.0) 40%, rgba(2,40,89,0.0) 60%, rgba(2,40,89,0.7) 100%), linear-gradient(90deg, rgba(2,40,89,0.55) 0%, rgba(2,40,89,0.0) 50%)",
+              "linear-gradient(180deg, rgba(13,13,13,0.4) 0%, rgba(13,13,13,0.0) 40%, rgba(13,13,13,0.0) 60%, rgba(13,13,13,0.7) 100%), linear-gradient(90deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.0) 50%)",
           }}
         />
         <div className="relative z-10 px-6 lg:px-14 pt-24 pb-20">
@@ -245,7 +245,7 @@ const ESTOQILabs: React.FC = () => {
                       className="absolute inset-0"
                       style={{
                         background:
-                          "linear-gradient(180deg, rgba(2,40,89,0.0) 0%, rgba(2,40,89,0.0) 45%, rgba(2,40,89,0.78) 100%)",
+                          "linear-gradient(180deg, rgba(13,13,13,0.0) 0%, rgba(13,13,13,0.0) 45%, rgba(13,13,13,0.78) 100%)",
                       }}
                     />
                     <div

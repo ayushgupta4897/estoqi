@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 /* =====================================================================
    ESTOQI · EmailGateModal
@@ -84,15 +85,23 @@ const EmailGateModal: React.FC<Props> = ({
     console.log("[ESTOQI · report-request stub]", payload);
     await new Promise((r) => setTimeout(r, 450));
 
+    /* If this slug has a published HTML report, jump straight to it.
+       The report page itself shows a "we've emailed you a copy" caption
+       below the sheet, so the email confirmation is not lost. */
+    if (viewPath) {
+      navigate({ to: viewPath });
+      onClose();
+      return;
+    }
     setStatus("done");
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="email-gate-title"
-      className="fixed inset-0 z-50 bg-ink/85 flex items-center justify-center p-4 lg:p-10"
+      className="fixed inset-0 z-50 bg-ink/85 flex items-center justify-center p-4 lg:p-10 overflow-y-auto"
       onClick={onClose}
     >
       <div
@@ -198,7 +207,8 @@ const EmailGateModal: React.FC<Props> = ({
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
