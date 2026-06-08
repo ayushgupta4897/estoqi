@@ -117,7 +117,7 @@ const AboutESTOQI: React.FC = () => {
                   className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute bottom-3 right-3 font-mono text-[9.5px] tracking-[0.18em] uppercase text-bone/85">
-                  Bengaluru · 2026
+                  Pune · 2026
                 </div>
               </div>
             </div>
