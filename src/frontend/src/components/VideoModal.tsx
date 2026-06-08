@@ -44,7 +44,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-estoqi-dark/92 backdrop-blur-sm animate-fade-in-scale" />
+      <div className="absolute inset-0 bg-ink/92 backdrop-blur-sm animate-fade-in-scale" />
 
       {/* Modal Content */}
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation only */}

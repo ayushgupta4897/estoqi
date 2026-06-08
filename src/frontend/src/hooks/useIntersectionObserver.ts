@@ -42,7 +42,9 @@ export function useIntersectionObserver(
 
 export function useScrollAnimation(className = "visible") {
   useEffect(() => {
-    const elements = document.querySelectorAll(".fade-up, .fade-in, .scale-in");
+    const elements = document.querySelectorAll(
+      ".reveal, .fade-up, .fade-in, .scale-in",
+    );
 
     const observer = new IntersectionObserver(
       (entries) => {

@@ -122,7 +122,7 @@ const JournalCard: React.FC<{ entry: JournalEntry; index: number }> = ({
         className="relative rounded-sm overflow-hidden mb-5"
         style={{ aspectRatio: "16/9" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-estoqi-dark to-[oklch(0.18_0.04_155)]">
+        <div className="absolute inset-0 bg-gradient-to-br from-ink to-[oklch(0.18_0.04_155)]">
           <div
             className={`absolute inset-0 transition-opacity duration-500 ${
               hovered ? "opacity-100" : "opacity-0"
@@ -181,7 +181,7 @@ const JournalCard: React.FC<{ entry: JournalEntry; index: number }> = ({
       </div>
 
       <header>
-        <h2 className="font-semibold text-foreground text-lg leading-snug mb-3 group-hover:text-estoqi-green transition-colors">
+        <h2 className="font-semibold text-foreground text-lg leading-snug mb-3 group-hover:text-vermillion transition-colors">
           {entry.title}
         </h2>
       </header>
@@ -194,7 +194,7 @@ const JournalCard: React.FC<{ entry: JournalEntry; index: number }> = ({
         <time dateTime={entry.date} className="text-muted-foreground text-xs">
           {entry.displayDate}
         </time>
-        <span className="inline-flex items-center gap-1 label-caps text-estoqi-green text-xs group-hover:gap-2 transition-all">
+        <span className="inline-flex items-center gap-1 label-caps text-vermillion text-xs group-hover:gap-2 transition-all">
           Read More <ChevronRight size={12} />
         </span>
       </div>
@@ -213,9 +213,9 @@ const Journal: React.FC = () => {
       : journalEntries.filter((e) => e.category === activeCategory);
 
   return (
-    <main className="bg-estoqi-off-white">
+    <main className="bg-bone">
       {/* Hero */}
-      <section className="relative pt-32 pb-20 bg-estoqi-off-white overflow-hidden">
+      <section className="relative pt-32 pb-20 bg-bone overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <img
             src="/assets/generated/hero-molecules.dim_1920x1080.png"
@@ -224,7 +224,7 @@ const Journal: React.FC = () => {
           />
         </div>
         <div className="relative max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <p className="label-caps text-estoqi-green mb-6 animate-slide-up">
+          <p className="label-caps text-vermillion mb-6 animate-slide-up">
             Journal
           </p>
           <h1
@@ -246,7 +246,7 @@ const Journal: React.FC = () => {
       </section>
 
       {/* Category Filter */}
-      <section className="sticky top-16 lg:top-20 z-30 bg-estoqi-off-white/92 backdrop-blur-md border-b border-border">
+      <section className="sticky top-16 lg:top-20 z-30 bg-bone/92 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex gap-1 overflow-x-auto py-4 scrollbar-hide">
             {categories.map((cat) => (
@@ -256,7 +256,7 @@ const Journal: React.FC = () => {
                 onClick={() => setActiveCategory(cat)}
                 className={`flex-shrink-0 px-5 py-2 rounded-full label-caps text-xs transition-all duration-300 ${
                   activeCategory === cat
-                    ? "bg-estoqi-green text-white"
+                    ? "bg-vermillion text-white"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >

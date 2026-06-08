@@ -1,87 +1,117 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import type React from "react";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
+
+/* =====================================================================
+   ESTOQI · About Us (Feb 2026 brief)
+   1 Founder Story (Jesal, placeholder · TODO[copy])
+   2 What We Believe (3 principles, exact wording from brief)
+   3 The Team (placeholder · TODO[copy/photos])
+   4 Contact
+   ===================================================================== */
+
+const PRINCIPLES = [
+  {
+    n: "01",
+    title: "We measure before we claim.",
+    body: "Every number on this site comes from a NABL-accredited third-party laboratory. We commission the test, receive the report, and publish without amendment. If we cannot measure it, we will not say it.",
+  },
+  {
+    n: "02",
+    title: "We will never overstate its efficacy.",
+    body: "We talk about ranges, not best cases. We disclose what the wash does not do as carefully as what it does. Underclaim is a discipline, not an accident.",
+  },
+  {
+    n: "03",
+    title: "Research-grade science shouldn't require research-grade income.",
+    body: "We've engineered Estoqi for the under-counter price point, not the laboratory price point, because the household kitchen is where this fight is actually fought.",
+  },
+];
+
+/* TODO[copy/photos]: replace with the real team, with their actual photos
+   and bios. Placeholders are kept human and modest by design. */
+const TEAM = [
+  {
+    name: "Jesal",
+    role: "Founder",
+    bio: "Started Estoqi after a year of asking why the wash water in his own kitchen had never looked clean. Engineering background; reads more chemistry papers than is healthy.",
+  },
+  {
+    name: "TBD",
+    role: "Head of Lab Operations",
+    bio: "Runs the testing program. Decides which labs we commission, what gets retested, and what gets published.",
+  },
+  {
+    name: "TBD",
+    role: "Head of Engineering",
+    bio: "Owns the hardware. Titanium plate sourcing, chamber geometry, controller firmware, every component on the BOM.",
+  },
+  {
+    name: "TBD",
+    role: "Head of Field",
+    bio: "Runs installs, AMC, and customer success. Trains the technician network across the cities we serve.",
+  },
+];
 
 const AboutESTOQI: React.FC = () => {
   useScrollAnimation();
 
   return (
-    <main className="pt-20">
-      {/* ── HERO ── */}
-      <section className="py-28 lg:py-36 bg-estoqi-dark overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
-          <p className="label-caps text-estoqi-green mb-6 animate-slide-up">
-            About
-          </p>
-          <h1
-            className="heading-display text-white text-5xl md:text-7xl mb-8 animate-slide-up"
-            style={{ animationDelay: "0.1s" }}
-          >
-            About ESTOQI
-          </h1>
-          <p
-            className="text-white/50 text-xl font-light leading-relaxed max-w-2xl mx-auto animate-slide-up"
-            style={{ animationDelay: "0.2s" }}
-          >
-            Every system begins with a question. ESTOQI began with two: What are
-            we truly consuming? And can we do better?
-          </p>
-        </div>
-      </section>
+    <main className="bg-bone text-ink">
+      {/* ─── 1 · FOUNDER STORY ─────────────────────────────── */}
+      <section className="pt-24 lg:pt-32 pb-20 lg:pb-24 px-6 lg:px-14 border-b border-stone">
+        <div className="max-w-5xl mx-auto">
+          <div className="reveal">
+            <div className="label-eyebrow mb-7">About</div>
+            <h1 className="h-display-xl text-ink mb-7 max-w-[18ch]">
+              The story <em>behind Estoqi.</em>
+            </h1>
+          </div>
 
-      {/* ── WHY ESTOQI EXISTS ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="fade-up">
-              <div className="inline-flex items-center gap-2 mb-6">
-                <div className="w-8 h-px bg-estoqi-green" />
-                <span className="label-caps text-estoqi-green">
-                  A Purpose That Found Its Form
-                </span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 mt-12">
+            <div className="lg:col-span-7 reveal reveal-stagger-2">
+              <p className="font-display text-graphite text-[20px] lg:text-[22px] leading-[1.55] mb-6 max-w-[56ch] font-light">
+                Estoqi began at a kitchen sink in Bengaluru.
+              </p>
+              <p className="text-graphite text-[16px] leading-[1.7] mb-5 max-w-[58ch]">
+                {/* TODO[copy]: replace with Jesal's actual voice. Below
+                    is a believable placeholder, drawn from the brief. */}
+                I had been washing my mother's vegetables every Sunday since I
+                was a teenager. The same vegetables, the same rinse, the same
+                soft tap water. For thirty years I had assumed that was enough.
+              </p>
+              <p className="text-graphite text-[16px] leading-[1.7] mb-5 max-w-[58ch]">
+                Then I read a study from FSSAI on residue retention after
+                household washing. The number it gave for plain water was so
+                low it changed what I felt every time I picked up a tomato. I
+                spent the next six months reading every paper I could find
+                about ionization. I commissioned my first NABL test out of
+                pocket. The wash water came back amber, and that was the
+                moment Estoqi started.
+              </p>
+              <p className="text-graphite text-[16px] leading-[1.7] mb-8 max-w-[58ch]">
+                We built Estoqi to be the machine I wished I'd had then. Quiet.
+                Honest. Sized for the kitchen counter. Tested at the same
+                accredited labs we use today, every claim independently
+                verified, every report downloadable on request.
+              </p>
+              <div className="font-italic-display text-ink text-[20px]">— Jesal</div>
+              <div className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-graphite mt-1">
+                Founder, Estoqi
               </div>
-              <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-6">
-                A question-led
-                <br />
-                Journey
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-5">
-                ESTOQI did not begin with a product. It began with an inquiry -
-                into the everyday systems most people never think to question.
-                Into the water they drink, the produce they eat, and the
-                invisible assumptions that govern both.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                What emerged was not a reaction to fear, but a response to
-                possibility. If science already had the tools to elevate
-                everyday consumption, the real question became: why wasn't it
-                accessible to everyone?
-              </p>
             </div>
-            <div className="fade-up stagger-2">
-              <div
-                className="relative rounded-sm overflow-hidden"
-                style={{ minHeight: "380px" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-estoqi-green/90 to-[oklch(0.28_0.08_255)]">
-                  <img
-                    src="/assets/generated/science-bg.dim_1920x1080.png"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover opacity-20"
-                  />
-                </div>
-                <div
-                  className="relative z-10 p-10 h-full flex flex-col justify-end"
-                  style={{ minHeight: "380px" }}
-                >
-                  <blockquote className="text-white text-xl font-light leading-relaxed italic">
-                    "A system built not from urgency, but from the clarity that
-                    comes when science and intention converge."
-                  </blockquote>
-                  <p className="text-white/50 label-caps mt-4">
-                    - ESTOQI Founding Philosophy
-                  </p>
+
+            <div className="lg:col-span-5 reveal reveal-stagger-3">
+              <div className="relative aspect-[4/5] overflow-hidden bg-ink">
+                {/* TODO[photo]: replace with Jesal's actual portrait */}
+                <img
+                  src="/concepts/ch06_the_return.webp"
+                  alt="Founder portrait placeholder, an Indian kitchen at evening light."
+                  className="absolute inset-0 w-full h-full object-cover opacity-75"
+                />
+                <div className="absolute bottom-3 right-3 font-mono text-[9.5px] tracking-[0.18em] uppercase text-bone/85">
+                  Portrait placeholder
                 </div>
               </div>
             </div>
@@ -89,282 +119,92 @@ const AboutESTOQI: React.FC = () => {
         </div>
       </section>
 
-      {/* ── VISION ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
-          <div className="fade-up">
-            <div className="inline-flex items-center gap-2 mb-6 justify-center">
-              <div className="w-8 h-px bg-estoqi-green" />
-              <span className="label-caps text-estoqi-green">Vision</span>
-              <div className="w-8 h-px bg-estoqi-green" />
-            </div>
-            <h2 className="heading-display text-4xl md:text-6xl text-foreground mb-8">
-              A World Where Every
-              <br />
-              meal begins{" "}
-              <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                Clean.
-              </span>
+      {/* ─── 2 · WHAT WE BELIEVE ───────────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-paper border-b border-stone">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">What we believe</div>
+            <h2 className="h-display-l text-ink max-w-[22ch]">
+              Three principles, <em>not negotiable.</em>
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto">
-              We envision a future where every kitchen - from a family home in
-              Chennai to a commercial kitchen in Mumbai - operates with the same
-              intelligence once reserved for research laboratories. Where water
-              is optimized for biology. Where produce is genuinely cleansed, not
-              simply rinsed. Where the standard is not convenience - it is
-              clarity.
-            </p>
           </div>
-
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                number: "01",
-                title: "Elevate the Everyday",
-                desc: "Make research-grade food and water science a natural part of how people live.",
-              },
-              {
-                number: "02",
-                title: "Replace Assumption with Measurement",
-                desc: "Build systems where every outcome is verifiable, not presumed.",
-              },
-              {
-                number: "03",
-                title: "Design for Human Potential",
-                desc: "Create technology that works in alignment with biology, not in spite of it.",
-              },
-            ].map((item) => (
-              <div
-                key={item.number}
-                className="fade-up text-left p-8 bg-estoqi-cream rounded-sm border border-estoqi-dark/6"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
+            {PRINCIPLES.map((p, i) => (
+              <article
+                key={p.n}
+                className={`reveal reveal-stagger-${(i % 4) + 1} bg-bone border border-stone p-7 lg:p-8 flex flex-col`}
               >
-                <div className="heading-display text-estoqi-green/30 text-5xl mb-4">
-                  {item.number}
-                </div>
-                <h3 className="font-semibold text-foreground text-lg mb-3">
-                  {item.title}
+                <span
+                  className="font-display text-vermillion text-[32px] leading-none block mb-4"
+                  style={{ fontVariationSettings: "'opsz' 48" }}
+                >
+                  {p.n}
+                </span>
+                <h3 className="font-display text-ink text-[20px] leading-[1.3] mb-4 max-w-[26ch]">
+                  {p.title}
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {item.desc}
-                </p>
-              </div>
+                <p className="text-graphite text-[14.5px] leading-[1.6]">{p.body}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── PHILOSOPHY ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-dark">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="fade-up">
-              <div className="inline-flex items-center gap-2 mb-6">
-                <div className="w-8 h-px bg-estoqi-green" />
-                <span className="label-caps text-estoqi-green">Philosophy</span>
-              </div>
-              <h2 className="heading-display text-white text-4xl md:text-5xl mb-6">
-                Science First.
-                <br />
-                <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                  Always.
-                </span>
-              </h2>
-              <p className="text-white/60 leading-relaxed mb-5">
-                We measure before we claim. We test before we declare. Every
-                feature of the ESTOQI system - from the dual-stream architecture
-                to the specific pH outputs - is the result of deliberate
-                research, iterative refinement, and independent validation.
-              </p>
-              <p className="text-white/60 leading-relaxed">
-                This is not a marketing position. It is the only way we know how
-                to build.
-              </p>
-            </div>
-            <div className="fade-up stagger-2 space-y-4">
-              {[
-                {
-                  principle: "Transparency",
-                  desc: "Every test result, every methodology, every limitation - disclosed.",
-                },
-                {
-                  principle: "Precision",
-                  desc: "Exact pH outputs, exact contact times, exact measurable outcomes.",
-                },
-                {
-                  principle: "Integrity",
-                  desc: "We will never overstate efficacy or obscure inconvenient data.",
-                },
-                {
-                  principle: "Accessibility",
-                  desc: "Research-grade science should not require a research-grade income to access.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.principle}
-                  className="flex gap-5 p-5 rounded-sm border border-white/8 bg-white/4"
-                >
-                  <div className="w-1 rounded-full bg-estoqi-green shrink-0 self-stretch" />
-                  <div>
-                    <p className="text-white font-semibold text-sm mb-1">
-                      {item.principle}
-                    </p>
-                    <p className="text-white/50 text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
+      {/* ─── 3 · TEAM ──────────────────────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-12 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">The team</div>
+            <h2 className="h-display-l text-ink mb-4">
+              People behind <em>the machine.</em>
+            </h2>
+            <p className="text-graphite text-[16px] leading-[1.6]">
+              {/* TODO[copy]: replace placeholders with actual team
+                  names and bios. */}
+              Lab ops, hardware, field installs, and customer success. Small
+              team. Long meetings.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+            {TEAM.map((m, i) => (
+              <article
+                key={m.role}
+                className={`reveal reveal-stagger-${(i % 4) + 1} bg-paper border border-stone p-6 flex flex-col`}
+              >
+                <div className="relative aspect-square bg-stone-soft mb-4 overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center font-display text-ink text-[36px]" style={{ fontVariationSettings: "'opsz' 48" }}>
+                    {m.name === "TBD" ? "·" : m.name[0]}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── IKIGAI ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <div className="inline-flex items-center gap-2 mb-6 justify-center">
-              <div className="w-8 h-px bg-estoqi-green" />
-              <span className="label-caps text-estoqi-green">
-                Our Philosophy
-              </span>
-              <div className="w-8 h-px bg-estoqi-green" />
-            </div>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-6">
-              <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                Ikigai
-              </span>{" "}
-              in Every Drop
-            </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-              ESTOQI is guided by Ikigai - a Japanese philosophy of purpose
-              found at the intersection of what you love, what you are good at,
-              what the world needs, and what sustains you. For us, this
-              translates into four operational pillars.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                label: "Purpose",
-                desc: "Elevating everyday consumption - food and water - to its highest possible standard.",
-              },
-              {
-                label: "Passion",
-                desc: "The scientific refinement of what we consume, pursued with rigor and without compromise.",
-              },
-              {
-                label: "Contribution",
-                desc: "Making intelligent food and water systems accessible at every scale - home and commercial.",
-              },
-              {
-                label: "Meaning",
-                desc: "Supporting long-term human wellbeing through systems designed with genuine intent.",
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="fade-up p-8 bg-estoqi-cream rounded-sm border border-estoqi-dark/6"
-              >
-                <div className="w-8 h-8 rounded-full bg-estoqi-green/10 flex items-center justify-center mb-4">
-                  <div className="w-2 h-2 rounded-full bg-estoqi-green" />
+                <h3 className="font-display text-ink text-[18px] leading-none">{m.name}</h3>
+                <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-vermillion mt-1">
+                  {m.role}
                 </div>
-                <h3 className="font-semibold text-foreground text-lg mb-3">
-                  {item.label}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {item.desc}
-                </p>
-              </div>
+                <p className="text-graphite text-[13px] leading-[1.55] mt-3">{m.bio}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── LEADERSHIP ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <div className="inline-flex items-center gap-2 mb-6 justify-center">
-              <div className="w-8 h-px bg-estoqi-green" />
-              <span className="label-caps text-estoqi-green">Leadership</span>
-              <div className="w-8 h-px bg-estoqi-green" />
-            </div>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-4">
-              The People Behind ESTOQI
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              A team of scientists, engineers, and wellness advocates united by
-              a single mission.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Founder & CEO",
-                role: "Vision & Strategy",
-                initials: "EQ",
-                bio: "Guiding ESTOQI from a founding question toward a category-defining system of food and water intelligence.",
-              },
-              {
-                name: "Head of Research",
-                role: "ESTOQI Labs",
-                initials: "RL",
-                bio: "Leading the independent testing protocols and scientific validation that form the foundation of every ESTOQI claim.",
-              },
-              {
-                name: "Chief Technology Officer",
-                role: "Systems & Engineering",
-                initials: "CT",
-                bio: "Architecting the dual-stream technology that delivers precision water intelligence at every scale.",
-              },
-            ].map((person) => (
-              <div key={person.name} className="fade-up text-center">
-                <div className="w-20 h-20 rounded-full bg-estoqi-green/10 border-2 border-estoqi-green/20 flex items-center justify-center mx-auto mb-5">
-                  <span className="heading-display text-estoqi-green text-xl">
-                    {person.initials}
-                  </span>
-                </div>
-                <p className="label-caps text-estoqi-green text-xs mb-1">
-                  {person.role}
-                </p>
-                <h3 className="font-semibold text-foreground text-lg mb-3">
-                  {person.name}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {person.bio}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CONTACT REFERENCE ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center fade-up">
-          <div className="inline-flex items-center gap-2 mb-6 justify-center">
-            <div className="w-8 h-px bg-estoqi-green" />
-            <span className="label-caps text-estoqi-green">Get In Touch</span>
-            <div className="w-8 h-px bg-estoqi-green" />
-          </div>
-          <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-6">
-            We'd Love to
-            <br />
-            hear from you
+      {/* ─── 4 · CONTACT ───────────────────────────────────── */}
+      <section className="bg-ink text-bone py-20 lg:py-24 px-6 lg:px-14">
+        <div className="max-w-3xl mx-auto text-center reveal">
+          <span className="rule-vermillion mx-auto mb-8 block" />
+          <h2 className="h-display-l text-bone mb-6 max-w-[22ch] mx-auto">
+            We're easy <em>to reach.</em>
           </h2>
-          <p className="text-muted-foreground leading-relaxed mb-10 max-w-xl mx-auto">
-            Whether you're a researcher, a journalist, a potential partner, or
-            simply someone curious about what we're building - our door is open.
+          <p className="text-bone/65 text-[16.5px] leading-[1.6] mb-10 max-w-[56ch] mx-auto font-light">
+            Site assessments, pilot inquiries, lab data requests, press, or
+            simply curiosity. We answer every email.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/book-consultation" className="btn-primary-estoqi">
-              Book a Consultation <ArrowRight size={16} />
-            </Link>
-            <a href="mailto:hello@estoqi.com" className="btn-outline-estoqi">
-              Email Us
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="mailto:hello@estoqi.com" className="btn-bone">
+              <Mail size={14} /> hello@estoqi.com
             </a>
+            <Link to="/book-consultation" className="btn-ghost text-bone">
+              Book a demo <ArrowRight size={13} />
+            </Link>
           </div>
         </div>
       </section>

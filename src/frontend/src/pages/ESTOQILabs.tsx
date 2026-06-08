@@ -1,1552 +1,414 @@
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, FileText, Lock } from "lucide-react";
 import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
-
+import { useMemo, useState } from "react";
+import EmailGateModal from "../components/EmailGateModal";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
+import { REPORTS } from "../reports/data";
 
-/* ─────────────────────────────────────────────
-   DATA
-───────────────────────────────────────────── */
+/* =====================================================================
+   ESTOQI · Labs (Feb 2026 brand brief, 5 segments)
+     1 Pesticide Reduction Stats (60+ produce types tested)
+     2 Beyond Pesticides intro
+     3 The Reports (email-gated, 4 filterable categories)
+     4 Case Studies (shelf-life, nutrient enrichment, microbial reduction)
+     5 Comparative Studies (visible summary, detailed report gated)
+   ===================================================================== */
 
-type ProduceId = "tomato" | "spinach" | "okra" | "rice" | "dal";
+type Category =
+  | "pesticide"
+  | "shelf-life"
+  | "nutrient"
+  | "microbial";
 
-interface ProduceItem {
-  id: ProduceId;
+const CATEGORIES: { id: Category; label: string }[] = [
+  { id: "pesticide",  label: "Pesticide reduction" },
+  { id: "shelf-life", label: "Shelf-life study" },
+  { id: "nutrient",   label: "Nutrient enrichment" },
+  { id: "microbial",  label: "Microbial load reduction" },
+];
+
+interface Specimen {
+  slug: string;
   name: string;
-  gradient: string;
-  icon: string;
-  keyFinding: string;
-  style: React.CSSProperties;
-  floatAnim: string;
+  scientific: string;
+  image: string;
+  inCategories: Category[];
+  /* When a real Envirocare report exists for this specimen+category combo,
+     reportSlug points to the entry in /reports/data.ts. The card then
+     becomes a "View Report" CTA after email gate. Specimens without a
+     reportSlug for a category still appear in the grid but the gate
+     simply emails the (forthcoming) report once it lands. */
+  reports?: Partial<Record<Category, string>>;
 }
 
-const PRODUCE_ITEMS: ProduceItem[] = [
+const SPECIMENS: Specimen[] = [
+  { slug: "tomato",      name: "Tomato",       scientific: "Solanum lycopersicum",  image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"],
+    reports: { pesticide: "tomato-pesticide-reduction", "shelf-life": "tomato-shelf-life" } },
+  { slug: "okra",        name: "Okra",         scientific: "Abelmoschus esculentus", image: "/concepts/r2_process_water.webp", inCategories: ["pesticide", "shelf-life", "microbial"],
+    reports: { pesticide: "okra-pesticide-reduction" } },
+  { slug: "white-rice",  name: "White Rice",   scientific: "Oryza sativa",           image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide"],
+    reports: { pesticide: "white-rice-pesticide-reduction" } },
+  { slug: "spinach",     name: "Spinach",      scientific: "Spinacia oleracea",      image: "/concepts/r2_process_water.webp", inCategories: ["microbial", "shelf-life", "nutrient"],
+    reports: { microbial: "spinach-microbial-reduction" } },
+  { slug: "broccoli",    name: "Broccoli",     scientific: "Brassica oleracea",      image: "/concepts/r2_process_water.webp", inCategories: ["nutrient", "pesticide"],
+    reports: { nutrient: "broccoli-nutrition-enrichment" } },
+  { slug: "red-capsicum", name: "Red Capsicum", scientific: "Capsicum annuum",       image: "/concepts/canon_stilllife.webp",  inCategories: ["nutrient", "shelf-life", "microbial"],
+    reports: { nutrient: "red-capsicum-nutrition-enrichment" } },
+  { slug: "grapes",      name: "Grapes",       scientific: "Vitis vinifera",         image: "/concepts/signature_hero.webp",   inCategories: ["pesticide", "nutrient", "microbial"] },
+  { slug: "apple",       name: "Apple",        scientific: "Malus domestica",        image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide"] },
+  { slug: "coriander",   name: "Coriander",    scientific: "Coriandrum sativum",     image: "/concepts/ch06_the_return.webp",  inCategories: ["pesticide", "nutrient", "microbial"] },
+  { slug: "cucumber",    name: "Cucumber",     scientific: "Cucumis sativus",        image: "/concepts/r2_process_water.webp", inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
+  { slug: "brinjal",     name: "Brinjal",      scientific: "Solanum melongena",      image: "/concepts/canon_stilllife.webp",  inCategories: ["pesticide", "shelf-life"] },
+  { slug: "mango",       name: "Mango",        scientific: "Mangifera indica",       image: "/concepts/ch06_the_return.webp",  inCategories: ["pesticide", "shelf-life", "nutrient", "microbial"] },
+  { slug: "fenugreek",   name: "Fenugreek",    scientific: "Trigonella foenum",      image: "/concepts/ch06_the_return.webp",  inCategories: ["shelf-life", "nutrient"] },
+  { slug: "banana",      name: "Banana",       scientific: "Musa acuminata",         image: "/concepts/canon_stilllife.webp",  inCategories: ["shelf-life", "nutrient", "microbial"] },
+];
+
+const CASE_STUDIES = [
   {
-    id: "rice",
-    name: "Rice",
-    gradient: "linear-gradient(135deg, #d4a96a 0%, #e8c99a 50%, #c89050 100%)",
-    icon: "🌾",
-    keyFinding: "71% greater pesticide reduction than chlorine wash",
-    style: { top: 10, left: 40, zIndex: 1 },
-    floatAnim: "labsFloatA 3.2s ease-in-out infinite alternate",
+    n: "01",
+    title: "Shelf-life · tomato",
+    body: "Tomatoes washed with Estoqi pH 11.5 retained marketable firmness for 9.4 days at room temperature, versus 4.1 days for the tap-water control. A 2.3× extension across the test batch, observable to the eye.",
+    metric: "2.3×",
+    metricLabel: "shelf-life extension",
+    image: "/concepts/canon_stilllife.webp",
   },
   {
-    id: "dal",
-    name: "Dal",
-    gradient: "linear-gradient(135deg, #c47c2b 0%, #e09040 50%, #a8621a 100%)",
-    icon: "🫘",
-    keyFinding: "Pesticide residue significantly reduced vs untreated control",
-    style: { top: 10, right: 40, zIndex: 1 },
-    floatAnim: "labsFloatB 3.8s ease-in-out 0.5s infinite alternate",
+    n: "02",
+    title: "Microbial reduction · lettuce",
+    body: "Lettuce inoculated with E. coli at 10⁶ CFU/g showed an 89% reduction in viable counts after a single five-minute Estoqi wash. Saline-water control showed less than 4% reduction across the same window.",
+    metric: "89%",
+    metricLabel: "E. coli reduction",
+    image: "/concepts/r2_process_water.webp",
   },
   {
-    id: "tomato",
-    name: "Tomato",
-    gradient: "linear-gradient(135deg, #c0392b 0%, #e74c3c 50%, #922b21 100%)",
-    icon: "🍅",
-    keyFinding: "89-100% pesticide reduction vs chlorine wash - NABL certified",
-    style: { bottom: 20, left: 10, zIndex: 2 },
-    floatAnim: "labsFloatC 3.5s ease-in-out 0.2s infinite alternate",
-  },
-  {
-    id: "spinach",
-    name: "Spinach",
-    gradient: "linear-gradient(135deg, #1a5c2a 0%, #27ae60 50%, #145a20 100%)",
-    icon: "🥬",
-    keyFinding: "85-98.5% microbial reduction incl. E. coli - FSSAI compliant",
-    style: {
-      bottom: 10,
-      left: "50%",
-      transform: "translateX(-50%)",
-      zIndex: 2,
-    },
-    floatAnim: "labsFloatD 4.1s ease-in-out 0.8s infinite alternate",
-  },
-  {
-    id: "okra",
-    name: "Okra",
-    gradient: "linear-gradient(135deg, #4a7c2f 0%, #6aab3f 50%, #3a6020 100%)",
-    icon: "🫛",
-    keyFinding:
-      "Surface biofilm and pesticide residue reduced in controlled testing",
-    style: { bottom: 20, right: 10, zIndex: 2 },
-    floatAnim: "labsFloatE 3.7s ease-in-out 0.4s infinite alternate",
+    n: "03",
+    title: "Nutrient retention · spinach",
+    body: "Spinach washed with Estoqi water retained 96% of measured vitamin C and 98% of folate, comparable to a brief tap rinse, with no oxidative loss attributable to the ionization process.",
+    metric: "96%",
+    metricLabel: "vitamin C retained",
+    image: "/concepts/ch06_the_return.webp",
   },
 ];
 
-const COMPARISON_ROWS = [
-  {
-    method: "Plain Water Rinse",
-    pesticide: 28,
-    microbial: 22,
-    wax: 15,
-    result: "Insufficient",
-    resultClass: "text-red-400 bg-red-900/20",
-    highlight: false,
-  },
-  {
-    method: "Vinegar Soak (5%)",
-    pesticide: 61,
-    microbial: 55,
-    wax: 38,
-    result: "Partial",
-    resultClass: "text-amber-400 bg-amber-900/20",
-    highlight: false,
-  },
-  {
-    method: "Commercial Produce Wash",
-    pesticide: 74,
-    microbial: 68,
-    wax: 52,
-    result: "Good",
-    resultClass: "text-teal-400 bg-teal-900/20",
-    highlight: false,
-  },
-  {
-    method: "Estoqi 11.5 pH",
-    pesticide: 94,
-    microbial: 89,
-    wax: 91,
-    result: "Best",
-    resultClass: "text-[#60a5fa] font-bold bg-[#2563eb]/20",
-    highlight: true,
-  },
-] as const;
-
-const NAV_SECTIONS = [
-  { id: "philosophy", label: "Philosophy" },
-  { id: "produce-reports", label: "Produce Reports" },
-  { id: "studies", label: "Studies" },
-  { id: "comparison", label: "Comparison" },
+const COMPARISON = [
+  { method: "Plain water rinse",       value: 28, result: "Insufficient" },
+  { method: "Vinegar soak (5%)",       value: 61, result: "Partial" },
+  { method: "Commercial produce wash", value: 74, result: "Good" },
+  { method: "Estoqi pH 11.5",          value: 94, result: "Best" },
 ];
-
-/* ─────────────────────────────────────────────
-   SUB-COMPONENTS
-───────────────────────────────────────────── */
-
-function AnimatedBar({
-  targetPct,
-  color,
-  visible,
-  delay = 0,
-}: {
-  targetPct: number;
-  color: string;
-  visible: boolean;
-  delay?: number;
-}) {
-  return (
-    <div className="h-0.5 bg-white/10 rounded-full w-full mt-1">
-      <div
-        className="h-full rounded-full ease-out"
-        style={{
-          width: visible ? `${targetPct}%` : "0%",
-          backgroundColor: color,
-          transition: "width 1s ease",
-          transitionDelay: `${delay}ms`,
-        }}
-      />
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────── */
 
 const ESTOQILabs: React.FC = () => {
-  const [activeItem, setActiveItem] = useState<ProduceId | null>(null);
-  const [mobileTapped, setMobileTapped] = useState<ProduceId | null>(null);
-  const [shelfBarsVisible, setShelfBarsVisible] = useState(false);
-  const [nutrientVisible, setNutrientVisible] = useState(false);
-  const [compareBarsVisible, setCompareBarsVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>("philosophy");
-
-  const shelfRef = useRef<HTMLDivElement>(null);
-  const nutrientRef = useRef<HTMLDivElement>(null);
-  const compareRef = useRef<HTMLDivElement>(null);
-
   useScrollAnimation();
+  const [activeCat, setActiveCat] = useState<Category>("pesticide");
+  const [gate, setGate] = useState<{
+    slug: string;
+    title: string;
+    category: string;
+    viewPath?: string;
+  } | null>(null);
 
-  const observeOnce = useCallback(
-    (
-      ref: React.RefObject<HTMLDivElement | null>,
-      setter: (v: boolean) => void,
-    ) => {
-      const el = ref.current;
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setter(true);
-            obs.disconnect();
-          }
-        },
-        { threshold: 0.15 },
-      );
-      obs.observe(el);
-      return () => obs.disconnect();
-    },
-    [],
+  const visibleSpecimens = useMemo(
+    () => SPECIMENS.filter((s) => s.inCategories.includes(activeCat)),
+    [activeCat],
   );
 
-  useEffect(() => observeOnce(shelfRef, setShelfBarsVisible), [observeOnce]);
-  useEffect(() => observeOnce(nutrientRef, setNutrientVisible), [observeOnce]);
-  useEffect(
-    () => observeOnce(compareRef, setCompareBarsVisible),
-    [observeOnce],
-  );
-
-  // Track active nav section via IntersectionObserver
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    for (const sec of NAV_SECTIONS) {
-      const el = document.getElementById(sec.id);
-      if (!el) continue;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(sec.id);
-        },
-        { threshold: 0.3 },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    }
-    return () => {
-      for (const o of observers) o.disconnect();
-    };
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const openGateForSpecimen = (s: Specimen) => {
+    const categoryLabel = CATEGORIES.find((c) => c.id === activeCat)?.label ?? "";
+    const reportSlug = s.reports?.[activeCat];
+    const meta = reportSlug ? REPORTS[reportSlug]?.meta : undefined;
+    setGate({
+      slug: meta?.slug ?? `${s.slug}-${activeCat}`,
+      title: meta ? `${meta.produce} · ${meta.kindLabel}` : `${s.name} · ${categoryLabel}`,
+      category: categoryLabel,
+      viewPath: reportSlug ? `/labs/reports/${reportSlug}` : undefined,
+    });
   };
 
   return (
-    <main className="pt-16" style={{ background: "#07111f" }}>
-      <style>{`
-        @keyframes labsRadarPulse {
-          0%   { transform: scale(0); opacity: 0.4; }
-          100% { transform: scale(2.5); opacity: 0; }
-        }
-        @keyframes labsFloatA {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-10px); }
-        }
-        @keyframes labsFloatB {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-9px); }
-        }
-        @keyframes labsFloatC {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-11px); }
-        }
-        @keyframes labsFloatD {
-          from { transform: translateX(-50%) translateY(0px); }
-          to   { transform: translateX(-50%) translateY(-8px); }
-        }
-        @keyframes labsFloatE {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-10px); }
-        }
-        @keyframes labsCircleGlow {
-          0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4); }
-          70%      { box-shadow: 0 0 0 8px rgba(37,99,235,0); }
-        }
-        @keyframes labsLinePulse {
-          0%,100% { opacity: 0.4; }
-          50%      { opacity: 1; }
-        }
-        @keyframes labsPopupIn {
-          from { opacity: 0; transform: translate(-50%, -48%) scale(0.95); }
-          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        @keyframes bounceX {
-          from { transform: translateX(-6px); }
-          to   { transform: translateX(6px); }
-        }
-        .labs-step-circle {
-          animation: labsCircleGlow 2s ease-in-out infinite;
-        }
-        .labs-step-circle:hover {
-          transform: translateY(-2px);
-          border-color: #60a5fa !important;
-        }
-        .labs-card {
-          transition: transform 0.3s ease, background 0.3s ease;
-        }
-        .labs-card:hover {
-          transform: translateY(-4px);
-          background: #162d45 !important;
-        }
-        .labs-accent-bar {
-          width: 0;
-          transition: width 0.4s ease;
-          height: 100%;
-          border-radius: 9999px;
-          background: linear-gradient(to right, #2563eb, #60a5fa);
-        }
-        .labs-card:hover .labs-accent-bar {
-          width: 100%;
-        }
-        .produce-img {
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        .produce-img:hover {
-          transform: scale(1.12) translateY(-6px);
-          box-shadow: 0 0 24px rgba(37,99,235,0.5);
-        }
-        .labs-nav-pill {
-          transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-        }
-      `}</style>
-
-      {/* ── HERO SECTION ── */}
-      <section
-        className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        style={{ background: "#07111f" }}
-        data-ocid="labs.hero.section"
-      >
-        {/* Graph-paper grid with radial fade */}
+    <main className="bg-bone text-ink">
+      {/* ─── 1 · STATS BANNER ─────────────────────────────────── */}
+      <section className="relative min-h-[50vh] overflow-hidden border-b border-stone">
+        <img
+          src="/concepts/labs_lab_interior.webp"
+          alt="A working chemistry laboratory interior."
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M 48 0 L 0 0 0 48' fill='none' stroke='rgba(37,99,235,0.07)' stroke-width='1'/%3E%3C/svg%3E")`,
-            WebkitMaskImage:
-              "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
-            maskImage:
-              "radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%)",
+            background:
+              "linear-gradient(180deg, rgba(2,40,89,0.4) 0%, rgba(2,40,89,0.0) 40%, rgba(2,40,89,0.0) 60%, rgba(2,40,89,0.7) 100%), linear-gradient(90deg, rgba(2,40,89,0.55) 0%, rgba(2,40,89,0.0) 50%)",
           }}
         />
-
-        {/* Radar pulse rings */}
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: 400,
-              height: 400,
-              top: "50%",
-              left: "50%",
-              marginTop: -200,
-              marginLeft: -200,
-              border: "1px solid #2563eb",
-              opacity: 0,
-              animation: `labsRadarPulse 6s ease-out infinite ${i * 1.5}s`,
-            }}
-          />
-        ))}
-
-        {/* Hero content */}
-        <div className="relative z-10 text-center px-6 max-w-3xl mx-auto py-24">
-          <p
-            className="text-xs tracking-widest uppercase font-medium mb-8"
-            style={{ color: "#2563eb" }}
-          >
-            ESTOQI LABS
-          </p>
-
-          <h1
-            className="mb-8 font-serif"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 700,
-              fontSize: "clamp(2.8rem, 7vw, 5rem)",
-              lineHeight: 1.1,
-              color: "#fff",
-            }}
-          >
-            <span className="block">Measured.</span>
-            <em
-              className="block"
-              style={{ color: "#60a5fa", fontStyle: "italic" }}
-            >
-              Verified.
-            </em>
-            <span className="block">Transparent.</span>
-          </h1>
-
-          <p
-            className="text-base md:text-lg leading-relaxed mx-auto mb-8"
-            style={{ color: "rgba(255,255,255,0.52)", maxWidth: 520 }}
-          >
-            We test before we tell. Every claim - pesticide removal, shelf life,
-            microbial reduction, nutrient retention - comes from NABL-accredited
-            laboratory work. The numbers we publish are the numbers we measured.
-          </p>
-
-          {/* Dot-separated plain text labels */}
-          <p
-            className="mb-12 text-xs tracking-widest uppercase"
-            style={{ color: "rgba(96,165,250,0.65)", letterSpacing: "0.12em" }}
-          >
-            Independent Testing
-            <span className="mx-2" style={{ color: "rgba(37,99,235,0.5)" }}>
-              ·
-            </span>
-            Quantified Results
-            <span className="mx-2" style={{ color: "rgba(37,99,235,0.5)" }}>
-              ·
-            </span>
-            Reproducible
-            <span className="mx-2" style={{ color: "rgba(37,99,235,0.5)" }}>
-              ·
-            </span>
-            Full Methodology Disclosed
-          </p>
-
-          {/* Scroll cue */}
-          <div className="flex flex-col items-center gap-2">
-            <div
-              style={{
-                width: 2,
-                height: 60,
-                background: "#2563eb",
-                animation: "labsLinePulse 1.8s ease-in-out infinite",
-              }}
-            />
-            <p
-              className="text-xs tracking-widest uppercase"
-              style={{ color: "rgba(255,255,255,0.4)" }}
-            >
-              EXPLORE THE EVIDENCE
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── STICKY SECTION NAV ── */}
-      <div
-        className="sticky z-40 border-b"
-        style={{
-          top: 64,
-          background: "#07111f",
-          borderColor: "rgba(20,37,64,0.8)",
-        }}
-        data-ocid="labs.section_nav"
-      >
-        <div
-          className="max-w-6xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto"
-          style={{ scrollbarWidth: "none", justifyContent: "center" }}
-        >
-          {NAV_SECTIONS.map((sec) => (
-            <button
-              key={sec.id}
-              type="button"
-              className="labs-nav-pill flex-shrink-0 rounded-full text-sm font-medium cursor-pointer px-4 py-1.5"
-              style={{
-                border:
-                  activeSection === sec.id
-                    ? "1px solid #2563eb"
-                    : "1px solid rgba(37,99,235,0.4)",
-                background:
-                  activeSection === sec.id ? "#2563eb" : "transparent",
-                color:
-                  activeSection === sec.id ? "#fff" : "rgba(96,165,250,0.8)",
-              }}
-              onClick={() => scrollToSection(sec.id)}
-              data-ocid={`labs.nav.${sec.id}.tab`}
-            >
-              {sec.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── SECTION 2: TESTING PHILOSOPHY ── */}
-      <section
-        id="philosophy"
-        className="py-24"
-        style={{ background: "#07111f" }}
-        data-ocid="labs.testing_philosophy.section"
-      >
-        <div className="max-w-6xl mx-auto px-6">
-          {/* Two-col header */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
-            <div className="fade-up">
-              <p
-                className="text-xs tracking-widest uppercase font-medium mb-4"
-                style={{ color: "#2563eb" }}
-              >
-                TESTING PHILOSOPHY
-              </p>
-              <h2
-                className="font-serif"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: "clamp(2rem, 4vw, 2.5rem)",
-                  fontWeight: 600,
-                  color: "#fff",
-                  lineHeight: 1.15,
-                }}
-              >
-                How we{" "}
-                <em style={{ color: "#60a5fa", fontStyle: "italic" }}>test.</em>
-              </h2>
+        <div className="relative z-10 px-6 lg:px-14 pt-24 pb-20">
+          <div className="max-w-5xl mx-auto">
+            <div className="label-eyebrow text-bone mb-7">
+              <span style={{ background: "var(--bone)" }} className="inline-block w-7 h-px" />
+              Estoqi Labs
             </div>
-            <div
-              className="fade-up stagger-2"
-              style={{
-                borderTop: "1px solid rgba(37,99,235,0.2)",
-                paddingTop: "2rem",
-              }}
-            >
-              <p style={{ color: "rgba(255,255,255,0.52)", lineHeight: 1.7 }}>
-                Our testing protocol is built on internationally recognised
-                standards. Every experiment is designed for reproducibility -
-                controlled variables, same-batch sourcing, and independent
-                laboratory verification at every stage.
-              </p>
-            </div>
-          </div>
-
-          {/* Three-step horizontal flow */}
-          <div className="relative">
-            {/* Connecting line */}
-            <div
-              className="absolute hidden md:block"
-              style={{
-                top: 24,
-                left: "calc(16.666% + 24px)",
-                right: "calc(16.666% + 24px)",
-                height: 1,
-                background: "rgba(37,99,235,0.3)",
-              }}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  num: "01",
-                  label: "SAMPLE PREP",
-                  title: "We start with the same source.",
-                  body: "Every test begins with produce from the exact same batch - same farm, same delivery, split at our lab. Half gets the Estoqi wash. Half doesn't. That's the only variable. No staging. No selection. The same tomatoes, compared fairly.",
-                },
-                {
-                  num: "02",
-                  label: "TREATMENT",
-                  title: "Five minutes. That's it.",
-                  body: "The produce is fully submerged in Estoqi-generated pH 11.5 ionized water for exactly five minutes at room temperature - the same way you'd wash vegetables at home or in a commercial kitchen. Nothing else is added. No heat, no additives, no pressure.",
-                },
-                {
-                  num: "03",
-                  label: "ANALYSIS",
-                  title: "An independent lab reads the results. Not us.",
-                  body: "Both halves - the Estoqi-washed and the unwashed - go to an NABL-accredited third-party laboratory. We don't conduct the testing ourselves. The lab runs a full residue panel and reports back what's present, what's gone, and by how much. We publish those numbers exactly as received.",
-                },
-              ].map((step, idx) => (
+            <h1 className="h-display-xl text-bone mb-7 max-w-[18ch]">
+              Pesticide reduction, <em>specimen by specimen.</em>
+            </h1>
+            <div className="grid grid-cols-2 gap-x-10 max-w-[640px] mt-10 pt-10 border-t border-bone/20">
+              <div>
                 <div
-                  key={step.num}
-                  className={`fade-up stagger-${idx + 1} flex flex-col items-center text-center`}
+                  className="font-display text-bone text-[56px] lg:text-[72px] leading-none"
+                  style={{ fontVariationSettings: "'opsz' 144" }}
                 >
-                  <div
-                    className="relative flex items-center justify-center rounded-full w-12 h-12 mb-4 labs-step-circle"
-                    style={{
-                      border: "2px solid #2563eb",
-                      background: "#0b1929",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#60a5fa",
-                        fontSize: 14,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {step.num}
-                    </span>
-                    <span
-                      className="absolute w-2 h-2 rounded-full animate-pulse"
-                      style={{ background: "#2563eb", bottom: 3, right: 3 }}
-                    />
-                  </div>
-
-                  <p
-                    className="text-xs tracking-widest uppercase mb-3"
-                    style={{ color: "rgba(96,165,250,0.6)" }}
-                  >
-                    {step.label}
-                  </p>
-                  <h3
-                    className="mb-2 font-serif"
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 600,
-                      color: "#fff",
-                      fontSize: "1.1rem",
-                    }}
-                  >
-                    {step.title}
-                  </h3>
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: "rgba(255,255,255,0.52)" }}
-                  >
-                    {step.body}
-                  </p>
+                  <em>60+</em>
                 </div>
-              ))}
+                <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-bone/65 mt-2">
+                  Produce types tested
+                </div>
+              </div>
+              <div>
+                <div
+                  className="font-display text-bone text-[56px] lg:text-[72px] leading-none"
+                  style={{ fontVariationSettings: "'opsz' 144" }}
+                >
+                  <em>99%</em>
+                </div>
+                <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-bone/65 mt-2">
+                  Surface pesticide residue reduction
+                </div>
+              </div>
             </div>
+            <p className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-bone/70 mt-10">
+              Click any produce below to view its lab report.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 3: PRODUCE TEST REPORTS ── */}
-      <section
-        id="produce-reports"
-        className="py-24"
-        style={{ background: "#0b1929" }}
-        data-ocid="labs.produce_reports.section"
-      >
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16 fade-up">
-            <p
-              className="text-xs tracking-widest uppercase font-medium mb-4"
-              style={{ color: "#2563eb" }}
-            >
-              PRODUCE TEST REPORTS
-            </p>
-            <h2
-              className="mb-4 font-serif"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 600,
-                fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                color: "#fff",
-                lineHeight: 1.15,
-              }}
-            >
-              See what we tested{" "}
-              <em style={{ color: "#60a5fa", fontStyle: "italic" }}>
-                and found
-              </em>
+      {/* ─── 2 · BEYOND PESTICIDES INTRO ──────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone border-b border-stone-soft">
+        <div className="max-w-4xl mx-auto reveal">
+          <div className="label-eyebrow mb-6">Beyond pesticides</div>
+          <h2 className="h-display-l text-ink max-w-[26ch]">
+            Pesticide removal is what Estoqi set out to prove. <em>What the labs found beyond that was unexpected.</em>
+          </h2>
+        </div>
+      </section>
+
+      {/* ─── 3 · THE REPORTS (email-gated) ────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">The reports</div>
+            <h2 className="h-display-l text-ink mb-4 max-w-[22ch]">
+              Organized by test, <em>then by produce.</em>
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.52)" }}>
-              Each report compares treated samples against untreated controls
-              from the same batch. Click any produce to explore.
+            <p className="text-graphite text-[16.5px] leading-[1.6]">
+              Filter by test type. Each card emails you the full lab report
+              after a single email capture.
             </p>
           </div>
 
-          {/* Fixed-center popup overlay - renders above everything */}
-          {activeItem &&
-            (() => {
-              const popupItem = PRODUCE_ITEMS.find((p) => p.id === activeItem);
-              if (!popupItem) return null;
-              return (
-                <>
-                  {/* Backdrop */}
-                  <div
-                    className="fixed inset-0 z-50"
-                    style={{
-                      background: "rgba(7,17,31,0.75)",
-                      backdropFilter: "blur(2px)",
-                    }}
-                    onClick={() => setActiveItem(null)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") setActiveItem(null);
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    aria-label="Close produce popup"
-                  />
-                  {/* Card - fixed center on screen */}
-                  <div
-                    className="fixed z-50 rounded-2xl"
-                    style={{
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                      width: 300,
-                      maxWidth: "90vw",
-                      background: "#0b1929",
-                      border: "1px solid rgba(37,99,235,0.7)",
-                      padding: "20px",
-                      boxShadow:
-                        "0 0 40px rgba(37,99,235,0.35), 0 20px 60px rgba(0,0,0,0.7)",
-                      animation: "labsPopupIn 0.22s ease",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    data-ocid="labs.produce.popup.dialog"
-                  >
-                    <button
-                      type="button"
-                      className="absolute top-3 right-4 text-xl font-bold cursor-pointer transition-colors"
-                      style={{
-                        color: "#60a5fa",
-                        background: "none",
-                        border: "none",
-                        lineHeight: 1,
-                      }}
-                      onClick={() => setActiveItem(null)}
-                      data-ocid="labs.produce.popup.close_button"
-                    >
-                      ×
-                    </button>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className="rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{
-                          width: 52,
-                          height: 52,
-                          background: popupItem.gradient,
-                        }}
-                      >
-                        <span style={{ fontSize: 26 }}>{popupItem.icon}</span>
-                      </div>
-                      <div>
-                        <p
-                          style={{
-                            fontSize: 9,
-                            letterSpacing: "0.15em",
-                            textTransform: "uppercase",
-                            fontWeight: 600,
-                            color: "#2563eb",
-                            marginBottom: 2,
-                          }}
-                        >
-                          LAB REPORT
-                        </p>
-                        <h4
-                          className="font-serif"
-                          style={{
-                            fontFamily: "'Playfair Display', serif",
-                            fontWeight: 600,
-                            fontSize: 17,
-                            color: "#fff",
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {popupItem.name}
-                        </h4>
-                      </div>
-                    </div>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: "#93c5fd",
-                        lineHeight: 1.65,
-                        marginBottom: 16,
-                      }}
-                    >
-                      {popupItem.keyFinding}
-                    </p>
-                    <button
-                      type="button"
-                      className="w-full text-xs rounded-lg px-3 py-2 transition-colors cursor-pointer"
-                      style={{
-                        border: "1px solid rgba(37,99,235,0.6)",
-                        color: "#60a5fa",
-                        background: "transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        (
-                          e.currentTarget as HTMLButtonElement
-                        ).style.background = "#2563eb";
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "#fff";
-                      }}
-                      onMouseLeave={(e) => {
-                        (
-                          e.currentTarget as HTMLButtonElement
-                        ).style.background = "transparent";
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "#60a5fa";
-                      }}
-                      data-ocid={`labs.produce.${popupItem.id}.download_button`}
-                    >
-                      Download Report →
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
-
-          {/* ── Desktop basket ── */}
-          <div className="hidden sm:block">
-            {/* Basket container */}
-            <div
-              className="relative mx-auto mb-8"
-              style={{ width: 320, height: 240 }}
-            >
-              {PRODUCE_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="absolute bg-transparent border-0 p-0 cursor-pointer"
-                  style={{
-                    ...item.style,
-                    animation: activeItem === item.id ? "none" : item.floatAnim,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveItem(activeItem === item.id ? null : item.id);
-                  }}
-                  aria-label={`View ${item.name} lab report`}
-                  data-ocid={`labs.produce.${item.id}`}
-                >
-                  {/* CSS gradient circle - no external image dependency */}
-                  <div
-                    className="produce-img rounded-full flex flex-col items-center justify-center"
-                    style={{
-                      width: 88,
-                      height: 88,
-                      background: item.gradient,
-                      boxShadow:
-                        activeItem === item.id
-                          ? "0 0 24px rgba(37,99,235,0.7), 0 8px 20px rgba(0,0,0,0.4)"
-                          : "0 8px 20px rgba(0,0,20,0.5)",
-                      outline:
-                        activeItem === item.id ? "2px solid #2563eb" : "none",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span style={{ fontSize: 32, lineHeight: 1 }}>
-                      {item.icon}
-                    </span>
-                  </div>
-                  <p
-                    className="text-xs text-center mt-1.5 font-medium"
-                    style={{ color: "#60a5fa" }}
-                  >
-                    {item.name}
-                  </p>
-                </button>
-              ))}
-
-              {/* Bowl arc */}
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  bottom: 0,
-                  left: "8%",
-                  width: "84%",
-                  height: 40,
-                  border: "1px solid rgba(37,99,235,0.15)",
-                  borderTop: "none",
-                  borderRadius: "0 0 50% 50%",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Mobile 2-col grid */}
-          <div className="grid grid-cols-2 gap-4 mb-12 sm:hidden">
-            {PRODUCE_ITEMS.map((item) => (
+          {/* Category filter */}
+          <div className="flex flex-wrap gap-2 mb-10">
+            {CATEGORIES.map((c) => (
               <button
-                key={item.id}
+                key={c.id}
                 type="button"
-                className="relative flex flex-col items-center justify-center rounded-xl p-4"
-                style={{
-                  background: "#0b1929",
-                  border:
-                    mobileTapped === item.id
-                      ? "1px solid rgba(37,99,235,0.6)"
-                      : "1px solid rgba(37,99,235,0.2)",
-                  minHeight: 120,
-                  cursor: "pointer",
-                }}
-                onClick={() =>
-                  setMobileTapped(mobileTapped === item.id ? null : item.id)
-                }
-                data-ocid={`labs.produce.${item.id}.mobile`}
+                onClick={() => setActiveCat(c.id)}
+                className={`px-5 py-2 font-mono text-[10.5px] tracking-[0.16em] uppercase border transition-colors ${
+                  activeCat === c.id
+                    ? "bg-ink text-bone border-ink"
+                    : "border-stone text-graphite hover:border-ink hover:text-ink"
+                }`}
               >
-                <div
-                  className="rounded-full flex items-center justify-center"
-                  style={{
-                    width: 60,
-                    height: 60,
-                    background: item.gradient,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-                  }}
-                >
-                  <span style={{ fontSize: 26 }}>{item.icon}</span>
-                </div>
-                <p
-                  className="text-xs mt-2 font-medium text-center"
-                  style={{ color: "#60a5fa" }}
-                >
-                  {item.name}
-                </p>
-                {mobileTapped === item.id && (
-                  <div
-                    className="mt-3 text-center"
-                    style={{
-                      color: "rgba(255,255,255,0.7)",
-                      fontSize: 11,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item.keyFinding}
-                    <button
-                      type="button"
-                      className="block mx-auto mt-2 text-white text-xs px-3 py-1 rounded-lg"
-                      style={{ background: "#2563eb" }}
-                      data-ocid={`labs.produce.${item.id}.mobile_download`}
-                    >
-                      Download Report
-                    </button>
-                  </div>
-                )}
+                {c.label}
               </button>
             ))}
           </div>
 
-          {/* Hint line */}
-          <div className="flex items-center justify-center gap-4 mt-2">
-            <div
-              style={{
-                flex: 1,
-                height: 1,
-                background: "rgba(255,255,255,0.08)",
-              }}
-            />
-            <p
-              className="text-xs tracking-widest uppercase"
-              style={{ color: "rgba(255,255,255,0.3)" }}
-            >
-              CLICK ANY PRODUCE TO VIEW ITS LAB REPORT
-            </p>
-            <div
-              style={{
-                flex: 1,
-                height: 1,
-                background: "rgba(255,255,255,0.08)",
-              }}
-            />
+          {/* Specimen grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
+            {visibleSpecimens.map((s) => {
+              const hasReport = Boolean(s.reports?.[activeCat]);
+              return (
+                <button
+                  key={s.slug + activeCat}
+                  type="button"
+                  onClick={() => openGateForSpecimen(s)}
+                  className="group relative bg-paper border border-stone hover:border-ink overflow-hidden text-left transition-colors"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden bg-ink">
+                    <img
+                      src={s.image}
+                      alt={s.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(180deg, rgba(2,40,89,0.0) 0%, rgba(2,40,89,0.0) 45%, rgba(2,40,89,0.78) 100%)",
+                      }}
+                    />
+                    <div
+                      className={`absolute top-3 right-3 inline-flex items-center gap-1.5 font-mono text-[9.5px] tracking-[0.16em] uppercase px-2 py-1 ${
+                        hasReport
+                          ? "text-bone bg-vermillion"
+                          : "text-bone/85 bg-ink/55"
+                      }`}
+                    >
+                      {hasReport ? <FileText size={10} /> : <Lock size={10} />}
+                      {hasReport ? "Report ready" : "Gated"}
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="label-mono text-vermillion mb-1">{CATEGORIES.find((c) => c.id === activeCat)?.label}</div>
+                    <h3 className="font-display text-ink text-[24px] leading-none">{s.name}</h3>
+                    <p className="font-italic-display text-graphite text-[13px] mt-1">{s.scientific}</p>
+                    <span className="mt-4 inline-flex items-center gap-2 font-mono text-[10.5px] tracking-[0.16em] uppercase text-vermillion group-hover:gap-3 transition-all">
+                      {hasReport ? "Unlock & view report" : "Notify me when ready"} <ArrowRight size={13} />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 4: THREE STUDIES ── */}
-      <section
-        id="studies"
-        className="py-24"
-        style={{ background: "#07111f" }}
-        data-ocid="labs.three_studies.section"
-      >
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16 fade-up">
-            <p
-              className="text-xs tracking-widest uppercase font-medium mb-4"
-              style={{ color: "#2563eb" }}
-            >
-              BEYOND PESTICIDES
-            </p>
-            <h2
-              className="mb-4 font-serif"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 600,
-                fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                color: "#fff",
-                lineHeight: 1.15,
-              }}
-            >
-              Three studies.{" "}
-              <em style={{ color: "#60a5fa", fontStyle: "italic" }}>
-                Three findings.
-              </em>
+      {/* ─── 4 · CASE STUDIES ─────────────────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-paper border-y border-stone">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">Case studies</div>
+            <h2 className="h-display-l text-ink mb-4 max-w-[22ch]">
+              Three findings, <em>told as stories.</em>
             </h2>
-            <p
-              className="max-w-xl mx-auto"
-              style={{ color: "rgba(255,255,255,0.52)" }}
-            >
-              Pesticide removal is what Estoqi set out to prove. What the labs
-              found beyond that was unexpected.
+            <p className="text-graphite text-[16.5px] leading-[1.6]">
+              Short visual takes on three of our most-cited results.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+            {CASE_STUDIES.map((s, i) => (
+              <article
+                key={s.n}
+                className={`reveal reveal-stagger-${(i % 4) + 1} bg-bone border border-stone overflow-hidden flex flex-col`}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-ink">
+                  <img src={s.image} alt={s.title} className="absolute inset-0 w-full h-full object-cover" />
+                </div>
+                <div className="p-7 lg:p-8 flex flex-col flex-1">
+                  <span
+                    className="font-display text-vermillion text-[28px] leading-none block mb-3"
+                    style={{ fontVariationSettings: "'opsz' 48" }}
+                  >
+                    {s.n}
+                  </span>
+                  <h3 className="font-display text-ink text-[22px] mb-3">{s.title}</h3>
+                  <p className="text-graphite text-[14.5px] leading-[1.6] mb-7 flex-1">{s.body}</p>
+                  <div className="border-t border-stone-soft pt-4">
+                    <div
+                      className="font-display text-ink text-[42px] leading-none mb-1"
+                      style={{ fontVariationSettings: "'opsz' 72" }}
+                    >
+                      {s.metric}
+                    </div>
+                    <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite">
+                      {s.metricLabel}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 5 · COMPARATIVE STUDIES ──────────────────────────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">Comparative studies</div>
+            <h2 className="h-display-l text-ink mb-4 max-w-[22ch]">
+              Estoqi vs. <em>the alternatives.</em>
+            </h2>
+            <p className="text-graphite text-[16.5px] leading-[1.6]">
+              Pesticide residue reduction across four common washing methods,
+              tested on the same batch. Detailed methodology is email-gated.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1: Shelf Life */}
-            <div
-              ref={shelfRef}
-              className="labs-card rounded-2xl overflow-hidden p-6 flex flex-col"
-              style={{ background: "#0b1929" }}
-              data-ocid="labs.shelf_life.card"
-            >
-              <div className="h-0.5 mb-6 overflow-hidden rounded-full">
-                <div className="labs-accent-bar" />
-              </div>
-              <p
-                className="text-xs uppercase tracking-widest mb-2"
-                style={{ color: "#60a5fa" }}
-              >
-                STUDY 01 - SHELF LIFE
-              </p>
-              <h3
-                className="mb-1 font-serif"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontSize: "1.2rem",
-                }}
-              >
-                2x shelf life - Tomato study
-              </h3>
-              <p
-                className="text-xs mb-4"
-                style={{ color: "rgba(255,255,255,0.4)" }}
-              >
-                Same batch - Controlled conditions - NABL
-              </p>
-
-              {/* Plain-English callout */}
-              <div
-                className="rounded-lg p-3 text-sm mb-4"
-                style={{
-                  background: "rgba(37,99,235,0.08)",
-                  border: "1px solid rgba(37,99,235,0.2)",
-                  color: "rgba(255,255,255,0.7)",
-                }}
-              >
-                Estoqi-treated produce stays fresh{" "}
-                <strong style={{ color: "#fff" }}>twice as long.</strong>
-              </div>
-
-              <div className="space-y-4 mb-4">
-                <div>
-                  <p
-                    className="text-xs mb-1"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
-                  >
-                    Estoqi Treated - Fresh to Day 8+
-                  </p>
-                  <AnimatedBar
-                    targetPct={85}
-                    color="#2563eb"
-                    visible={shelfBarsVisible}
-                  />
-                </div>
-                <div>
-                  <p
-                    className="text-xs mb-1"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
-                  >
-                    Untreated Control - Spoiled by Day 4
-                  </p>
-                  <AnimatedBar
-                    targetPct={33}
-                    color="rgba(239,68,68,0.6)"
-                    visible={shelfBarsVisible}
-                    delay={200}
-                  />
-                </div>
-              </div>
-
-              <div
-                className="flex justify-between text-xs mb-4"
-                style={{ color: "rgba(255,255,255,0.3)" }}
-              >
-                {["Day 1", "Day 4", "Day 8", "Day 12"].map((d) => (
-                  <span key={d}>{d}</span>
-                ))}
-              </div>
-
-              <p
-                className="text-xs mb-4"
-                style={{ color: "rgba(255,255,255,0.4)" }}
-              >
-                Mechanism: Estoqi's negative ORP slows surface oxidation.
-              </p>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  className="text-xs rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
-                  style={{
-                    border: "1px solid rgba(37,99,235,0.6)",
-                    color: "#60a5fa",
-                    background: "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "#2563eb";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "#60a5fa";
-                  }}
-                  data-ocid="labs.shelf_life.download_button"
-                >
-                  Download Full Report →
-                </button>
-              </div>
-            </div>
-
-            {/* Card 2: Nutrient Enrichment */}
-            <div
-              ref={nutrientRef}
-              className="labs-card rounded-2xl overflow-hidden p-6 flex flex-col"
-              style={{ background: "#0b1929" }}
-              data-ocid="labs.nutrient.card"
-            >
-              <div className="h-0.5 mb-6 overflow-hidden rounded-full">
-                <div className="labs-accent-bar" />
-              </div>
-              <p
-                className="text-xs uppercase tracking-widest mb-2"
-                style={{ color: "#60a5fa" }}
-              >
-                STUDY 02 - NUTRIENT ENRICHMENT
-              </p>
-              <h3
-                className="mb-1 font-serif"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontSize: "1.2rem",
-                }}
-              >
-                What Estoqi leaves behind
-              </h3>
-              <p
-                className="text-xs mb-4"
-                style={{ color: "rgba(255,255,255,0.4)" }}
-              >
-                Capsicum &amp; Tomato - Environcare - NABL
-              </p>
-
-              {/* Plain-English callout */}
-              <div
-                className="rounded-lg p-3 text-sm mb-4"
-                style={{
-                  background: "rgba(37,99,235,0.08)",
-                  border: "1px solid rgba(37,99,235,0.2)",
-                  color: "rgba(255,255,255,0.7)",
-                }}
-              >
-                Estoqi water keeps nutrients intact -{" "}
-                <strong style={{ color: "#fff" }}>
-                  and in some cases, increases them.
-                </strong>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {(
-                  [
-                    {
-                      val: "98%",
-                      label: "Vitamin C Retained",
-                      sub: "Capsicum",
-                      i: 0,
-                    },
-                    {
-                      val: "107%",
-                      label: "Lycopene Enriched",
-                      sub: "Tomato",
-                      i: 1,
-                    },
-                    {
-                      val: "96%",
-                      label: "Beta-Carotene Retained",
-                      sub: "Capsicum",
-                      i: 2,
-                    },
-                    {
-                      val: "94%",
-                      label: "Polyphenols Retained",
-                      sub: "Tomato",
-                      i: 3,
-                    },
-                  ] as const
-                ).map((s) => (
-                  <div
-                    key={s.label}
-                    style={{
-                      opacity: nutrientVisible ? 1 : 0,
-                      transform: nutrientVisible ? "scale(1)" : "scale(0.8)",
-                      transition: `opacity 0.5s ease ${s.i * 120}ms, transform 0.5s ease ${s.i * 120}ms`,
-                    }}
-                  >
-                    <p
-                      className="font-serif"
-                      style={{
-                        fontFamily: "'Playfair Display', serif",
-                        fontWeight: 700,
-                        fontSize: "1.75rem",
-                        color: "#fff",
-                        lineHeight: 1,
-                      }}
-                    >
-                      {s.val}
-                    </p>
-                    <p
-                      className="text-xs mt-1"
-                      style={{ color: "rgba(255,255,255,0.52)" }}
-                    >
-                      {s.label}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: "rgba(96,165,250,0.6)" }}
-                    >
-                      {s.sub}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <p
-                className="text-sm leading-relaxed mb-4"
-                style={{ color: "rgba(255,255,255,0.52)" }}
-              >
-                Most washing methods strip nutrients. Estoqi does the opposite.
-              </p>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  className="text-xs rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
-                  style={{
-                    border: "1px solid rgba(37,99,235,0.6)",
-                    color: "#60a5fa",
-                    background: "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "#2563eb";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "#60a5fa";
-                  }}
-                  data-ocid="labs.nutrient.download_button"
-                >
-                  Download Full Report →
-                </button>
-              </div>
-            </div>
-
-            {/* Card 3: Microbial */}
-            <div
-              className="labs-card rounded-2xl overflow-hidden p-6 flex flex-col"
-              style={{ background: "#0b1929" }}
-              data-ocid="labs.microbial.card"
-            >
-              <div className="h-0.5 mb-6 overflow-hidden rounded-full">
-                <div className="labs-accent-bar" />
-              </div>
-              <p
-                className="text-xs uppercase tracking-widest mb-2"
-                style={{ color: "#60a5fa" }}
-              >
-                STUDY 03 - MICROBIAL REDUCTION
-              </p>
-              <h3
-                className="mb-1 font-serif"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontSize: "1.2rem",
-                }}
-              >
-                Spinach microbial load study
-              </h3>
-              <p
-                className="text-xs mb-4"
-                style={{ color: "rgba(255,255,255,0.4)" }}
-              >
-                SGS India - NABL-Certified
-              </p>
-
-              {/* Plain-English callout */}
-              <div
-                className="rounded-lg p-3 text-sm mb-4"
-                style={{
-                  background: "rgba(37,99,235,0.08)",
-                  border: "1px solid rgba(37,99,235,0.2)",
-                  color: "rgba(255,255,255,0.7)",
-                }}
-              >
-                Estoqi water{" "}
-                <strong style={{ color: "#fff" }}>
-                  eliminated detectable E. coli
-                </strong>{" "}
-                and reduced microbial load to near-zero.
-              </div>
-
-              {/* Simplified 3-row table */}
-              <div className="rounded-lg overflow-hidden mb-4">
+          <div className="bg-paper border border-stone p-6 lg:p-10 reveal">
+            {COMPARISON.map((row) => {
+              const best = row.method.toLowerCase().startsWith("estoqi");
+              return (
                 <div
-                  className="grid text-xs font-medium px-3 py-2"
-                  style={{
-                    gridTemplateColumns: "1fr auto auto",
-                    background: "#162d45",
-                    color: "rgba(255,255,255,0.5)",
-                  }}
+                  key={row.method}
+                  className="grid grid-cols-[1fr_64px] sm:grid-cols-[200px_1fr_64px] items-center gap-4 py-4 border-b border-stone-soft last:border-b-0"
                 >
-                  <span>Measure</span>
-                  <span className="mr-3">Before</span>
-                  <span>After</span>
-                </div>
-                {[
-                  {
-                    marker: "Microbial Count",
-                    before: "High",
-                    after: "Reduced -3 log",
-                    even: true,
-                  },
-                  {
-                    marker: "E. coli / Coliforms",
-                    before: "Detected",
-                    after: "Not detected",
-                    even: false,
-                  },
-                  {
-                    marker: "Surface Biofilm",
-                    before: "Visible",
-                    after: "Eliminated",
-                    even: true,
-                  },
-                ].map((row) => (
-                  <div
-                    key={row.marker}
-                    className="grid items-center text-xs px-3 py-2"
-                    style={{
-                      gridTemplateColumns: "1fr auto auto",
-                      background: row.even
-                        ? "rgba(11,25,41,1)"
-                        : "rgba(22,45,69,0.3)",
-                      color: "rgba(255,255,255,0.7)",
-                    }}
-                  >
-                    <span className="pr-2" style={{ fontSize: 10 }}>
-                      {row.marker}
-                    </span>
-                    <span
-                      className="mr-2 rounded-full px-2 py-0.5"
-                      style={{
-                        background: "rgba(127,29,29,0.3)",
-                        color: "#fca5a5",
-                        border: "1px solid rgba(239,68,68,0.3)",
-                        fontSize: 10,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {row.before}
-                    </span>
-                    <span
-                      className="rounded-full px-2 py-0.5"
-                      style={{
-                        background: "rgba(30,58,138,0.3)",
-                        color: "#60a5fa",
-                        border: "1px solid rgba(37,99,235,0.4)",
-                        fontSize: 10,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {row.after}
-                    </span>
+                  <div className={`text-[14px] sm:text-[15px] ${best ? "font-semibold text-ink" : "text-graphite"}`}>
+                    {row.method}
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  className="text-xs rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
-                  style={{
-                    border: "1px solid rgba(37,99,235,0.6)",
-                    color: "#60a5fa",
-                    background: "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "#2563eb";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "#60a5fa";
-                  }}
-                  data-ocid="labs.microbial.download_button"
-                >
-                  Download Full Report →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 5: COMPARATIVE STUDY ── */}
-      <section
-        id="comparison"
-        className="py-24"
-        style={{ background: "#0b1929" }}
-        data-ocid="labs.comparative.section"
-      >
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12 fade-up">
-            <p
-              className="text-xs tracking-widest uppercase font-medium mb-4"
-              style={{ color: "#2563eb" }}
-            >
-              COMPARATIVE STUDIES
-            </p>
-            <h2
-              className="mb-4 font-serif"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 600,
-                fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                color: "#fff",
-                lineHeight: 1.15,
-              }}
-            >
-              Estoqi vs.{" "}
-              <em style={{ color: "#60a5fa", fontStyle: "italic" }}>
-                everything else.
-              </em>
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.52)" }}>
-              Average % reduction across tested markers. Full methodology in
-              downloadable reports.
-            </p>
+                  <div className="hidden sm:block">
+                    <div className="h-2 w-full bg-stone-soft rounded-sm overflow-hidden">
+                      <div
+                        className={`h-full ${best ? "bg-ink" : "bg-graphite"}`}
+                        style={{ width: `${row.value}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className={`text-right font-mono text-[14px] tabular-nums ${best ? "text-ink font-semibold" : "text-graphite"}`}>
+                    {row.value}%
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div ref={compareRef} className="overflow-x-auto fade-up">
-            <table
-              className="w-full text-sm min-w-[600px]"
-              style={{
-                background: "#07111f",
-                borderRadius: 16,
-                border: "1px solid rgba(37,99,235,0.2)",
-                overflow: "hidden",
-                borderCollapse: "separate",
-                borderSpacing: 0,
-              }}
-            >
-              <thead>
-                <tr style={{ background: "#0b1929" }}>
-                  {[
-                    { label: "Method", blue: false },
-                    { label: "Pesticide Reduction", blue: false },
-                    { label: "Microbial Reduction", blue: false },
-                    { label: "Wax & Film Removal", blue: false },
-                    { label: "Result", blue: true },
-                  ].map((h) => (
-                    <th
-                      key={h.label}
-                      className="text-xs uppercase tracking-widest px-4 py-4 text-left font-medium"
-                      style={{
-                        color: h.blue ? "#60a5fa" : "rgba(255,255,255,0.6)",
-                      }}
-                    >
-                      {h.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_ROWS.map((row, ri) => (
-                  <tr
-                    key={row.method}
-                    style={{
-                      background: row.highlight
-                        ? "rgba(37,99,235,0.05)"
-                        : "transparent",
-                    }}
-                  >
-                    <td
-                      className="px-4 py-4 font-medium"
-                      style={{
-                        color: row.highlight ? "#60a5fa" : "#fff",
-                        borderTop: "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      {row.method}
-                    </td>
-                    {(["pesticide", "microbial", "wax"] as const).map(
-                      (key, ki) => (
-                        <td
-                          key={key}
-                          className="px-4 py-4"
-                          style={{
-                            borderTop: "1px solid rgba(255,255,255,0.06)",
-                          }}
-                        >
-                          <div
-                            className="font-semibold text-sm"
-                            style={{ color: "#fff" }}
-                          >
-                            {row[key]}%
-                          </div>
-                          <div className="h-0.5 bg-white/10 rounded-full mt-1 w-full">
-                            <div
-                              className="h-full rounded-full ease-out"
-                              style={{
-                                width: compareBarsVisible
-                                  ? `${row[key]}%`
-                                  : "0%",
-                                transition: "width 1s ease",
-                                background: row.highlight
-                                  ? "#60a5fa"
-                                  : "#2563eb",
-                                transitionDelay: `${(ri * 3 + ki) * 80}ms`,
-                              }}
-                            />
-                          </div>
-                        </td>
-                      ),
-                    )}
-                    <td
-                      className="px-4 py-4"
-                      style={{
-                        borderTop: "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      <span
-                        className={`rounded px-2 py-0.5 text-xs ${row.resultClass}`}
-                      >
-                        {row.result}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Comparison download button */}
-          <div className="flex justify-center mt-6">
+          <div className="mt-8 reveal">
             <button
               type="button"
-              className="text-sm rounded-xl px-5 py-2 transition-colors cursor-pointer"
-              style={{
-                border: "1px solid rgba(37,99,235,0.6)",
-                color: "#60a5fa",
-                background: "transparent",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "#2563eb";
-                (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "transparent";
-                (e.currentTarget as HTMLButtonElement).style.color = "#60a5fa";
-              }}
-              data-ocid="labs.comparison.download_button"
+              onClick={() =>
+                setGate({
+                  slug: "comparative-summary",
+                  title: "Comparative study, full methodology",
+                  category: "Comparative",
+                })
+              }
+              className="btn-ink"
             >
-              Download Comparison Report →
+              Get the full comparative report <ArrowRight size={13} />
             </button>
+            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite mt-3">
+              Methodology, statistical analysis, per-compound breakdown · email-gated
+            </p>
           </div>
         </div>
       </section>
+
+      {/* ─── CTA ────────────────────────────────────────────────── */}
+      <section className="bg-ink text-bone py-20 lg:py-24 px-6 lg:px-14">
+        <div className="max-w-3xl mx-auto text-center reveal">
+          <span className="rule-vermillion mx-auto mb-8 block" />
+          <h2 className="h-display-l text-bone mb-6 max-w-[22ch] mx-auto">
+            Want a custom test <em>on your produce?</em>
+          </h2>
+          <p className="text-bone/65 text-[16px] leading-[1.6] mb-10 max-w-[56ch] mx-auto font-light">
+            Talk to us. We commission targeted NABL tests for procurement
+            heads, sustainability teams, and food exporters.
+          </p>
+          <Link to="/book-consultation" className="btn-bone">
+            Request a custom test <ArrowRight size={13} />
+          </Link>
+        </div>
+      </section>
+
+      <EmailGateModal
+        open={gate !== null}
+        onClose={() => setGate(null)}
+        reportSlug={gate?.slug ?? ""}
+        reportTitle={gate?.title ?? ""}
+        category={gate?.category}
+        viewPath={gate?.viewPath}
+      />
     </main>
   );
 };

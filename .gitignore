@@ -5,3 +5,7 @@ dist/
 .platform/
 .pnpm-store/
 .cache/
+.env
+.superpowers/
+.review_screenshots/
+.vercel

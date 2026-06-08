@@ -1,34 +1,72 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
-import VideoModal from "../components/VideoModal";
-import VideoPlaceholder from "../components/VideoPlaceholder";
+import { useEffect, useState } from "react";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
+
+/* =====================================================================
+   ESTOQI · Home
+   Sections (Feb 2026 brand brief):
+     1 Hero
+     2 Stats Strip
+     3 Clean-looking ≠ safe (rotating produce reels)
+     4 Brand Film · "Our Ikigai"
+     5 Dual Stream (short teaser → /the-system)
+     6 Same Science, Different Scales
+     7 Testimonials
+     8 Journal preview
+     (footer)
+   ===================================================================== */
+
+const PRODUCE_REELS = [
+  {
+    produce: "Tomato",
+    reduction: "94% pesticides",
+    image: "/concepts/canon_stilllife.webp",
+  },
+  {
+    produce: "Spinach",
+    reduction: "96% pesticides",
+    image: "/concepts/r2_process_water.webp",
+  },
+  {
+    produce: "Grapes",
+    reduction: "88% pesticides",
+    image: "/concepts/signature_hero.webp",
+  },
+  {
+    produce: "Coriander",
+    reduction: "93% pesticides",
+    image: "/concepts/ch06_the_return.webp",
+  },
+];
 
 const journalPosts = [
   {
     id: 1,
     category: "Water Science",
-    title: "The Science of Ionized Water: What pH Really Means",
+    title: "What pH 11.5 actually does to the wax on a tomato.",
     excerpt:
-      "Understanding the molecular difference between 9.5 pH drinking water and conventional tap water.",
+      "The mechanism, the molecular reach, and why plain water leaves residue behind.",
+    image: "/concepts/ch03_the_stack.webp",
     date: "Feb 12, 2026",
   },
   {
     id: 2,
-    category: "Nutrition",
-    title: "How 11.5 pH Water Transforms Produce Cleansing",
+    category: "The System",
+    title: "Inside the electrolysis chamber, a walk through the cell.",
     excerpt:
-      "A deep dive into how alkaline ionized water removes pesticide residues at the molecular level.",
+      "Surgical-grade titanium, a controlled current, two outputs from one source.",
+    image: "/concepts/ch04_the_water.webp",
     date: "Feb 5, 2026",
   },
   {
     id: 3,
-    category: "Wellness",
-    title: "Hydration Intelligence: Drinking Smarter, Not More",
+    category: "At the table",
+    title: "A tomato, returned to being a tomato.",
     excerpt:
-      "Why the quality of your water matters as much as the quantity you consume each day.",
+      "The everyday outcome, what an Estoqi household kitchen actually looks like.",
+    image: "/concepts/ch06_the_return.webp",
     date: "Jan 28, 2026",
   },
 ];
@@ -37,573 +75,416 @@ const testimonials = [
   {
     id: 1,
     name: "Priya M.",
-    quote: "Changed how our family thinks about food and water.",
+    location: "Bengaluru",
+    quote:
+      "The wash-water turns visibly amber the first time. After that, you can't unsee it. I haven't bought a single bottled produce-wash since.",
   },
   {
     id: 2,
     name: "Arjun K.",
-    quote: "The produce cleansing system is remarkable.",
+    location: "Mumbai",
+    quote:
+      "We pilot-installed two units at our cloud kitchen six months ago. The shelf-life numbers carried the conversation; the spoilage saved paid back the install in four months.",
   },
-  { id: 3, name: "Sunita R.", quote: "ESTOQI is the future of home wellness." },
+  {
+    id: 3,
+    name: "Sunita R.",
+    location: "Pune",
+    quote:
+      "I'm a sceptic about wellness claims. The NABL reports are downloadable. That's why I bought one.",
+  },
   {
     id: 4,
     name: "Vikram S.",
-    quote: "Our restaurant kitchen transformed overnight.",
+    location: "Delhi",
+    quote:
+      "It looks like a piece of laboratory equipment because that's what it is. Beautiful, quiet, and it does one job. I want every appliance in my kitchen to be this honest.",
   },
 ];
 
 const Home: React.FC = () => {
-  const [filmModalOpen, setFilmModalOpen] = useState(false);
-  const [hoveredSide, setHoveredSide] = useState<
-    "produce" | "hydration" | null
-  >(null);
-
   useScrollAnimation();
 
   return (
-    <main>
-      {/* ── 1. HERO ── */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Video BG */}
-        <div className="absolute inset-0 bg-gradient-to-br from-estoqi-dark via-[oklch(0.20_0.07_255)] to-[oklch(0.16_0.05_230)]">
-          <img
-            src="/assets/generated/hero-vegetables-water.dim_1920x1080.jpg"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-estoqi-dark/40 via-estoqi-dark/20 to-estoqi-dark/70" />
-        </div>
+    <main className="bg-bone text-ink font-body">
+      {/* ────────────────────────────────────────── 1 · HERO */}
+      <section className="relative h-screen min-h-[680px] overflow-hidden">
+        <img
+          src="/concepts/signature_hero.webp"
+          alt="A colander of fresh garden produce being rinsed with ionized water."
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(2,40,89,0.42) 0%, rgba(2,40,89,0.10) 28%, rgba(2,40,89,0.10) 48%, rgba(2,40,89,0.68) 100%), linear-gradient(90deg, rgba(2,40,89,0.55) 0%, rgba(2,40,89,0.0) 42%)",
+          }}
+        />
 
-        {/* Content */}
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-24">
-          <p className="label-caps text-white/50 mb-8 animate-slide-up">
-            India's First Dual-Stream Water Ionization System
-          </p>
-          <h1
-            className="heading-display text-white text-4xl md:text-6xl lg:text-7xl mb-6 animate-slide-up leading-tight"
-            style={{ animationDelay: "0.1s" }}
-          >
-            The Water That Actually Removes{" "}
-            <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-              Pesticides
-            </span>
-            <br />
-            From Your Food.
-          </h1>
-          <p
-            className="text-white/70 text-base md:text-lg font-light tracking-wide mb-10 animate-slide-up max-w-2xl mx-auto leading-relaxed"
-            style={{ animationDelay: "0.2s" }}
-          >
-            Estoqi's ionization technology removes up to 99% of pesticide
-            residues from fresh produce, using only water. No compromises.
-            NABL-verified by SGS India and Environcare Laboratories.
-          </p>
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up mb-10"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <button
-              type="button"
-              className="btn-primary-estoqi"
-              onClick={() => {
-                document
-                  .getElementById("brand-film")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-              data-ocid="hero.watch_demo_button"
-            >
-              Watch The Demo
-              <Play size={16} fill="white" />
-            </button>
+        <div className="absolute inset-x-0 bottom-0 z-10 px-6 lg:px-14 pb-14 lg:pb-16">
+          <div className="max-w-[920px]">
+            <div className="label-eyebrow text-bone mb-5">
+              <span style={{ background: "var(--bone)" }} className="inline-block w-7 h-px" />
+              India's first dual-stream ionizer , NABL accredited
+            </div>
+            <h1 className="h-display-xl text-bone max-w-[16ch] mb-5">
+              The wash that <em>actually</em> washes.
+            </h1>
+            <p className="font-body text-bone/85 text-[17px] leading-[1.55] max-w-[58ch] mb-8 font-light">
+              Estoqi's ionization technology removes up to 99% of pesticide
+              residues from fresh produce, using only water. No compromises.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/for-homes" className="btn-bone" data-ocid="hero.for_homes_link">
+                For Homes <ArrowRight size={13} />
+              </Link>
+              <Link
+                to="/for-food-businesses"
+                className="btn-ghost text-bone"
+                data-ocid="hero.for_businesses_link"
+              >
+                For Businesses <ArrowRight size={13} />
+              </Link>
+            </div>
           </div>
-          {/* Audience Fork Cards */}
-          <div
-            className="flex flex-col sm:flex-row gap-3 justify-center animate-slide-up"
-            style={{ animationDelay: "0.4s" }}
-          >
-            <Link
-              to="/for-homes"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-sm bg-white/8 backdrop-blur-md border border-white/15 text-white/85 hover:bg-white/15 hover:border-white/25 hover:text-white transition-all duration-300 text-[11px] font-medium tracking-[0.14em] uppercase"
-              data-ocid="hero.for_homes_link"
-            >
-              For Homes <ArrowRight size={13} />
-            </Link>
-            <Link
-              to="/for-food-businesses"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-sm bg-white/8 backdrop-blur-md border border-white/15 text-white/85 hover:bg-white/15 hover:border-white/25 hover:text-white transition-all duration-300 text-[11px] font-medium tracking-[0.14em] uppercase"
-              data-ocid="hero.for_businesses_link"
-            >
-              For Businesses <ArrowRight size={13} />
-            </Link>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40">
-          <div className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent" />
         </div>
       </section>
 
-      {/* ── STATS STRIP ── */}
-      <section
-        className="bg-estoqi-dark border-b border-white/8"
-        data-ocid="stats.section"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+      {/* ────────────────────────────────────────── 2 · STATS STRIP */}
+      <section className="bg-paper border-y border-stone">
+        <div className="max-w-7xl mx-auto px-6 lg:px-14 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-stone-soft">
             {(
               [
-                { num: "Up to 99%", label: "Pesticide reduction" },
-                { num: "2.2×", label: "Shelf life extension" },
-                { num: "100+", label: "Independent lab tests" },
-                { num: "1,200 ppb", label: "Molecular hydrogen" },
-                { num: "NABL", label: "Certified" },
-              ] as { num: string; label: string }[]
-            ).map((stat, i) => (
+                { num: "up to 99%", em: true, label: "Surface pesticide residue reduction" },
+                { num: "~2.2×", em: false, label: "Shelf-life extension" },
+                { num: "1,200", em: false, suffix: "ppb", label: "Molecular hydrogen" },
+                { num: "100+", em: false, label: "Independent lab tests" },
+              ] as { num: string; em: boolean; suffix?: string; label: string }[]
+            ).map((s, i) => (
               <div
-                key={`${stat.num}-${stat.label}`}
-                className="flex flex-col items-center text-center"
-                data-ocid={`stats.item.${i + 1}`}
+                key={s.label}
+                className={`flex flex-col gap-1 px-4 lg:px-8 ${i === 0 ? "pl-0 lg:pl-0" : ""}`}
               >
-                <span className="font-sans text-white font-extrabold text-4xl sm:text-5xl leading-none tracking-normal mb-2">
-                  {stat.num}
+                <span className="font-display text-ink text-[30px] sm:text-[36px] lg:text-[42px] leading-none">
+                  {s.em ? <em>{s.num}</em> : s.num}
+                  {s.suffix && (
+                    <span className="font-mono text-[14px] lg:text-[16px] tracking-tight ml-1 align-baseline text-graphite">
+                      {s.suffix}
+                    </span>
+                  )}
                 </span>
-                <span className="text-white/50 text-xs tracking-[0.15em] uppercase font-semibold leading-snug">
-                  {stat.label}
-                </span>
+                <span className="label-mono text-graphite mt-1">{s.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── 2. BRAND FILM ── */}
-      <section id="brand-film" className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">
-              The ESTOQI Story
-            </p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-6">
-              Your produce is clean-looking.
-              <br />
-              That doesn't make it safe.
+      {/* ────────────────────────────────────────── 3 · CLEAN-LOOKING ≠ SAFE */}
+      <section className="py-24 lg:py-32 bg-bone">
+        <div className="max-w-7xl mx-auto px-6 lg:px-14">
+          <div className="max-w-[640px] mb-12 reveal">
+            <div className="label-eyebrow mb-6">A closer look</div>
+            <h2 className="h-display-l text-ink mb-6">
+              Your produce is clean-looking. <em>That doesn't make it safe.</em>
             </h2>
+            <p className="text-graphite text-[17px] leading-[1.6]">
+              Across our independent tests, the wash water consistently runs
+              visibly murky. The residue is real, plain water just can't see
+              it.
+            </p>
           </div>
-          <div className="fade-up stagger-2">
-            <VideoPlaceholder
-              label="The ESTOQI Brand Film - 90 Seconds"
-              overlayText="Brand Film"
-              onClick={() => setFilmModalOpen(true)}
-              className="max-w-4xl mx-auto rounded-sm"
-            />
-          </div>
+          <ProduceReels />
         </div>
       </section>
 
-      {/* ── 3. DUAL STREAM SPLIT ── */}
-      <section className="pt-8 pb-24 lg:pb-32 bg-estoqi-off-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">The Dual Stream</p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-6">
-              A new standard for what{" "}
-              <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                clean food
-              </span>{" "}
-              means.
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Estoqi's electrolysis chamber passes a controlled electrical
-              current through surgical-grade titanium electrode plates —
-              transforming ordinary tap water into ionized water at two distinct
-              pH levels, each serving a different purpose.
-            </p>
-          </div>
+      {/* ────────────────────────────────────────── 4 · BRAND FILM · OUR IKIGAI */}
+      <BrandFilmSection />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 fade-up stagger-2">
-            {/* Stream 1 - pH 9.5 Drinking Water */}
-            <div
-              className={`relative rounded-sm overflow-hidden cursor-pointer transition-all duration-700 ${
-                hoveredSide === "hydration" ? "md:flex-[1.4]" : ""
-              }`}
-              style={{ minHeight: "480px" }}
-              onMouseEnter={() => setHoveredSide("hydration")}
-              onMouseLeave={() => setHoveredSide(null)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.35_0.12_230)] to-estoqi-blue">
-                <img
-                  src="https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800&q=80"
-                  alt="Glass of clean drinking water"
-                  className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
-                />
-              </div>
-              <div className="relative z-10 p-10 h-full flex flex-col justify-end">
-                <div className="mb-4">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-white label-caps text-xs mb-4">
-                    Stream 1 - pH 9.5 Drinking Water
-                  </span>
-                  <h3 className="heading-display text-white text-3xl md:text-4xl mb-3">
-                    Hydrogen-rich water
-                    <br />
-                    for daily hydration.
-                  </h3>
-                  <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-                    1,200 ppb molecular hydrogen. Negative ORP. Micro-clustered
-                    water molecules for better absorption. Every glass you
-                    drink, every cup of chai you brew - made with water that
-                    works better for you than the usual.
-                  </p>
-                </div>
-                <Link
-                  to="/science"
-                  className="inline-flex items-center gap-2 text-white/80 hover:text-white label-caps transition-colors mt-4"
-                >
-                  See the science <ChevronRight size={14} />
-                </Link>
+      {/* ────────────────────────────────────────── 5 · DUAL STREAM (teaser) */}
+      <section className="bg-paper border-y border-stone py-24 lg:py-32">
+        <div className="max-w-6xl mx-auto px-6 lg:px-14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-5 reveal">
+            <div className="label-eyebrow mb-6">The dual stream</div>
+            <h2 className="h-display-l text-ink mb-6">
+              One source. <em>Two waters.</em>
+            </h2>
+            <p className="text-graphite text-[17px] leading-[1.6] mb-7 max-w-[48ch]">
+              Estoqi's chamber splits ordinary tap water into two ionized
+              streams, each calibrated for a different purpose, on demand.
+            </p>
+            <Link to="/the-system" className="btn-ink">
+              See how it works <ArrowRight size={13} />
+            </Link>
+          </div>
+          <div className="lg:col-span-7 reveal reveal-stagger-2 grid grid-cols-2 gap-2">
+            <div className="relative aspect-[4/5] overflow-hidden bg-ink">
+              <img src="/concepts/hydration_moment.webp" alt="A glass of clear ionized water." className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute bottom-3 left-3 right-3 text-bone">
+                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Stream 01</div>
+                <div className="font-display text-[20px] leading-none mt-1">pH 9.5</div>
               </div>
             </div>
-
-            {/* Stream 2 - pH 11.5 Wash Water */}
-            <div
-              className="relative rounded-sm overflow-hidden cursor-pointer transition-all duration-700"
-              style={{ minHeight: "480px" }}
-              onMouseEnter={() => setHoveredSide("produce")}
-              onMouseLeave={() => setHoveredSide(null)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-estoqi-green to-[oklch(0.45_0.1_255)]">
-                <img
-                  src="/assets/generated/dual-stream-split.dim_1200x600.png"
-                  alt="Produce cleansing"
-                  className="absolute inset-0 w-full h-full object-cover object-left opacity-30"
-                />
-              </div>
-              <div className="relative z-10 p-10 h-full flex flex-col justify-end">
-                <div className="mb-4">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-white label-caps text-xs mb-4">
-                    Stream 2 - pH 11.5 Wash Water
-                  </span>
-                  <h3 className="heading-display text-white text-3xl md:text-4xl mb-3">
-                    Lifts pesticides
-                    <br />
-                    off your produce.
-                  </h3>
-                  <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-                    Ionized alkaline water at pH 11.5 has shown up to 99%
-                    pesticide residue removal in NABL-accredited lab tests - the
-                    highest efficacy recorded in our testing program. Used to
-                    wash vegetable, fruit, and grain before it reaches your
-                    plate.
-                  </p>
-                </div>
-                <Link
-                  to="/science"
-                  className="inline-flex items-center gap-2 text-white/80 hover:text-white label-caps transition-colors mt-4"
-                >
-                  See the science <ChevronRight size={14} />
-                </Link>
+            <div className="relative aspect-[4/5] overflow-hidden bg-ink">
+              <img src="/concepts/r2_process_water.webp" alt="Ionized wash water arcing onto spinach." className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute bottom-3 left-3 right-3 text-bone">
+                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Stream 02</div>
+                <div className="font-display text-[20px] leading-none mt-1">pH 11.5</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 5 & 6. FOR HOMES + BUSINESSES ── */}
-      <section className="pt-8 pb-24 lg:pb-32 bg-estoqi-off-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">ESTOQI For You</p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground">
-              Whether it's your kitchen or your cold chain -
-              <br />
-              <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                the science is the same.
-              </span>
+      {/* ────────────────────────────────────────── 6 · SAME SCIENCE, DIFFERENT SCALES */}
+      <section className="py-24 lg:py-32 bg-bone">
+        <div className="max-w-7xl mx-auto px-6 lg:px-14">
+          <div className="max-w-[680px] mb-16 reveal">
+            <div className="label-eyebrow mb-6">Estoqi, for you</div>
+            <h2 className="h-display-l text-ink mb-6">
+              Same science, <em>different scales.</em>
             </h2>
-            <div className="mt-8">
-              <Link
-                to="/science"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-sm border border-estoqi-green/40 text-estoqi-green hover:bg-estoqi-green hover:text-white transition-all duration-250 label-caps text-xs tracking-[0.12em] hover:scale-[1.02]"
-                data-ocid="kitchen_coldchain.science_cta_link"
-              >
-                Understand the Science <ArrowRight size={13} />
-              </Link>
-            </div>
+            <p className="text-graphite text-[17px] leading-[1.6] max-w-[62ch]">
+              Whether you're a parent washing tonight's vegetables or a
+              procurement head responsible for 10 tonnes a day, the science
+              behind Estoqi is the same. The standard is the same.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            {/* For Homes */}
-            <div className="fade-up stagger-1">
-              <div className="relative bg-white/95 rounded-2xl p-10 h-full flex flex-col border-2 border-estoqi-dark/15 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-estoqi-green rounded-t-2xl" />
-                <p className="label-caps text-estoqi-green mb-2 text-xs">
-                  For Homes
-                </p>
-                <h3 className="heading-display text-foreground text-2xl md:text-3xl mb-3">
-                  Clean food starts at your kitchen counter.
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                  You wash your family's food every day. Now that wash can
-                  actually do something. Estoqi's home ionizer fits under the
-                  counter, connects to your existing tap, and produces
-                  pesticide-removal wash water and drinking water - every meal,
-                  every day.
-                </p>
-                <div className="grid grid-cols-2 gap-3 mb-8 flex-1">
-                  <div className="rounded-xl border-2 border-estoqi-green/20 bg-estoqi-green/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-estoqi-green text-3xl font-extrabold leading-none">
-                      99%
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Pesticide reduction on fruits &amp; vegetables
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-estoqi-green/20 bg-estoqi-green/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-estoqi-green text-3xl font-extrabold leading-none">
-                      2.2×
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Longer shelf life on fresh produce
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-estoqi-green/20 bg-estoqi-green/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-estoqi-green text-2xl font-extrabold leading-none">
-                      1,200 ppb
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Molecular hydrogen in drinking water
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-estoqi-green/20 bg-estoqi-green/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-estoqi-green text-2xl font-extrabold leading-none">
-                      Simple
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      No plumber needed. No ongoing consumables beyond annual
-                      service.
-                    </span>
-                  </div>
-                </div>
-                <Link
-                  to="/for-homes"
-                  className="inline-flex items-center gap-2 label-caps text-estoqi-green text-xs hover:gap-3 transition-all mt-auto"
-                  data-ocid="audience.homes_cta_link"
-                >
-                  Explore Home Ionizers <ArrowRight size={13} />
-                </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            <Link
+              to="/for-homes"
+              className="group relative overflow-hidden bg-paper border border-stone reveal"
+              data-ocid="audience.homes_card_link"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-ink">
+                <img
+                  src="/concepts/canon_stilllife.webp"
+                  alt="Heirloom tomatoes on worn oak, a home kitchen counter scene."
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                />
               </div>
-            </div>
-
-            {/* For Businesses */}
-            <div className="fade-up stagger-2">
-              <div className="relative bg-white/95 rounded-2xl p-10 h-full flex flex-col border-2 border-estoqi-dark/15 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-estoqi-blue rounded-t-2xl" />
-                <p className="label-caps text-estoqi-blue mb-2 text-xs">
-                  For Businesses
-                </p>
-                <h3 className="heading-display text-foreground text-2xl md:text-3xl mb-3">
-                  Cleaner produce. Lower spoilage. Defensible food safety.
+              <div className="p-8 lg:p-10">
+                <div className="label-mono text-vermillion mb-3">For Homes</div>
+                <h3 className="h-display-m text-ink mb-4 max-w-[24ch]">
+                  Clean food starts <em>at your kitchen counter.</em>
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                  Estoqi installs and owns the equipment. You pay per kg of
-                  produce processed - no capex, no commitment. Scale up or down
-                  as your volume demands. Built for cold chains, cloud kitchens,
+                <p className="text-graphite text-[15px] leading-[1.6] mb-6 max-w-[48ch]">
+                  Fits at your kitchen counter. Connects to your existing tap.
+                  Two outlets, two outputs, wash water and drinking water, for
+                  every meal, every day.
+                </p>
+                <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-vermillion inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Explore home ionizers <ArrowRight size={13} />
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              to="/for-food-businesses"
+              className="group relative overflow-hidden bg-paper border border-stone reveal reveal-stagger-2"
+              data-ocid="audience.businesses_card_link"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-ink">
+                <img
+                  src="/concepts/business_scale.webp"
+                  alt="A commercial kitchen prep area, fresh greens being rinsed in an industrial sink."
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                />
+              </div>
+              <div className="p-8 lg:p-10">
+                <div className="label-mono text-oxide mb-3">For Businesses</div>
+                <h3 className="h-display-m text-ink mb-4 max-w-[24ch]">
+                  Cleaner produce. <em>Defensible food safety.</em>
+                </h3>
+                <p className="text-graphite text-[15px] leading-[1.6] mb-6 max-w-[48ch]">
+                  Estoqi installs and owns the equipment. You pay per kilogram
+                  processed. Built for cold chains, cloud kitchens,
                   quick-commerce, hospitals, and food exporters.
                 </p>
-                <div className="grid grid-cols-2 gap-3 mb-6 flex-1">
-                  <div className="rounded-xl border-2 border-[#2563eb]/20 bg-[#2563eb]/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-[#2563eb] text-3xl font-extrabold leading-none">
-                      Zero
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Upfront investment - per-kg pricing model
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-[#2563eb]/20 bg-[#2563eb]/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-[#2563eb] text-3xl font-extrabold leading-none">
-                      2.2×
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Shelf life extension - fewer write-offs, better margins
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-[#2563eb]/20 bg-[#2563eb]/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-[#2563eb] text-xl font-extrabold leading-none">
-                      IoT
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Real-time, auditable per-kg billing metering
-                    </span>
-                  </div>
-                  <div className="rounded-xl border-2 border-[#2563eb]/20 bg-[#2563eb]/5 px-4 py-4 flex flex-col gap-1">
-                    <span className="heading-display text-[#2563eb] text-xl font-extrabold leading-none">
-                      NABL
-                    </span>
-                    <span className="text-[11px] text-foreground/70 leading-snug font-medium">
-                      Certified data for food safety audits &amp; BRSR/ESG
-                    </span>
-                  </div>
-                </div>
-                <Link
-                  to="/book-consultation"
-                  className="inline-flex items-center gap-2 label-caps text-estoqi-blue text-xs hover:gap-3 transition-all mt-auto"
-                  data-ocid="audience.businesses_cta_link"
-                >
-                  Talk to Our B2B Team <ArrowRight size={13} />
-                </Link>
+                <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-oxide inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Talk to our B2B team <ArrowRight size={13} />
+                </span>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── CLOSING CTA ── */}
-      <section
-        className="w-full py-10 lg:py-12 bg-estoqi-dark"
-        data-ocid="closing_cta.section"
-      >
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <div className="fade-up">
-            <h2 className="heading-display text-white text-4xl md:text-5xl lg:text-6xl mb-8 leading-tight">
-              Every meal.
-              <br />
-              Every plate.{" "}
-              <span style={{ fontStyle: "italic", color: "#60a5fa" }}>
-                Every kg.
-              </span>
+      {/* ────────────────────────────────────────── 7 · TESTIMONIALS */}
+      <section className="py-24 lg:py-32 bg-paper border-y border-stone">
+        <div className="max-w-7xl mx-auto px-6 lg:px-14">
+          <div className="max-w-[720px] mb-16 reveal">
+            <div className="label-eyebrow mb-6">The Collective</div>
+            <h2 className="h-display-l text-ink">
+              People who switched, <em>and stayed.</em>
             </h2>
-            <p className="text-white/65 text-base md:text-lg leading-relaxed mb-12 max-w-2xl mx-auto font-light">
-              Whether you're a parent washing tonight's vegetables or a
-              procurement head responsible for 10 tonnes a day - the science
-              behind Estoqi is the same. The standard is the same. And the proof
-              is the same: independently verified, NABL-accredited, published
-              without caveats.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/book-consultation"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-sm bg-white text-estoqi-dark hover:bg-estoqi-cream label-caps text-[11px] tracking-[0.14em] transition-all duration-250 hover:scale-[1.02] font-semibold"
-                data-ocid="closing_cta.b2b_demo_link"
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+            {testimonials.map((t, i) => (
+              <figure
+                key={t.id}
+                className={`reveal reveal-stagger-${(i % 4) + 1}`}
               >
-                Book a B2B Demo <ArrowRight size={13} />
-              </Link>
-              <Link
-                to="/for-homes"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-sm border-2 border-white text-white hover:bg-white/10 label-caps text-[11px] tracking-[0.14em] transition-all duration-250 hover:scale-[1.02]"
-                data-ocid="closing_cta.shop_now_link"
-              >
-                Shop Now <ArrowRight size={13} />
-              </Link>
-            </div>
+                <blockquote className="font-display text-ink text-[22px] lg:text-[26px] leading-[1.35] mb-6">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="flex items-center gap-3 pt-4 border-t border-stone-soft">
+                  <div className="label-mono text-ink">{t.name}</div>
+                  <div className="font-mono text-[10.5px] text-graphite">
+                    , {t.location}
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <div className="mt-12 reveal">
+            <Link to="/collective" className="btn-ink">
+              Join the collective <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── 7. JOURNAL PREVIEW ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-16 fade-up">
-            <div>
-              <p className="label-caps text-estoqi-green mb-4">Journal</p>
-              <h2 className="heading-display text-4xl md:text-5xl text-foreground">
-                Intelligence
-                <br />
-                Dispatches
+      {/* ────────────────────────────────────────── 8 · JOURNAL PREVIEW */}
+      <section className="py-24 lg:py-32 bg-bone">
+        <div className="max-w-7xl mx-auto px-6 lg:px-14">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 reveal">
+            <div className="max-w-[720px]">
+              <div className="label-eyebrow mb-6">The Journal</div>
+              <h2 className="h-display-l text-ink">
+                Dispatches from <em>the lab and the table.</em>
               </h2>
             </div>
             <Link
               to="/journal"
-              className="hidden md:inline-flex items-center gap-2 label-caps text-estoqi-green hover:gap-3 transition-all"
+              className="hidden md:inline-flex items-center gap-2 label-mono text-vermillion hover:gap-3 transition-all"
             >
-              All Articles <ArrowRight size={14} />
+              All articles <ArrowRight size={14} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {journalPosts.map((post, i) => (
-              <JournalCard key={post.id} post={post} delay={i + 1} />
+              <JournalCard key={post.id} post={post} index={i} />
             ))}
           </div>
 
-          <div className="text-center mt-12 md:hidden fade-up">
-            <Link to="/journal" className="btn-primary-estoqi">
-              All Articles <ArrowRight size={16} />
+          <div className="text-center mt-12 md:hidden">
+            <Link to="/journal" className="btn-ink">
+              All articles <ArrowRight size={16} />
             </Link>
           </div>
         </div>
       </section>
-
-      {/* ── 8. COMMUNITY PREVIEW ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-dark overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">The Collective</p>
-            <h2 className="heading-display text-white text-4xl md:text-5xl">
-              Voices of the
-              <br />
-              ESTOQI Community
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.id}
-                className={`fade-up stagger-${i + 1} glass rounded-sm p-6 cursor-pointer hover:bg-white/15 transition-all duration-300`}
-              >
-                <div
-                  className="video-placeholder rounded-sm mb-4"
-                  style={{ aspectRatio: "1/1" }}
-                >
-                  <div className="play-icon" style={{ width: 40, height: 40 }}>
-                    <Play
-                      size={16}
-                      className="text-white ml-0.5"
-                      fill="white"
-                    />
-                  </div>
-                </div>
-                <p className="text-white font-medium text-sm mb-1">{t.name}</p>
-                <p className="text-white/50 text-xs leading-relaxed">
-                  "{t.quote}"
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center fade-up">
-            <Link to="/collective" className="btn-outline-estoqi">
-              Join The Collective <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── BUILT WITH INTENT ── */}
-      <section className="py-16 bg-estoqi-cream border-t border-estoqi-dark/5">
-        <div className="max-w-3xl mx-auto px-6 lg:px-8 text-center fade-up">
-          <div className="inline-flex items-center gap-2 mb-6 justify-center">
-            <div className="w-6 h-px bg-estoqi-green/50" />
-            <span className="label-caps text-estoqi-green text-xs">
-              Built with Intent
-            </span>
-            <div className="w-6 h-px bg-estoqi-green/50" />
-          </div>
-          <p className="text-muted-foreground text-base md:text-lg leading-relaxed font-light">
-            ESTOQI is a system guided by the alignment of science, purpose, and
-            everyday living. Every stream, every pH output, every interaction is
-            deliberate.
-          </p>
-        </div>
-      </section>
-
-      {/* Modals */}
-      <VideoModal
-        isOpen={filmModalOpen}
-        onClose={() => setFilmModalOpen(false)}
-        title="ESTOQI Brand Film"
-      />
     </main>
+  );
+};
+
+/* ─── Produce reels (rotating placeholders) ──────────────── */
+const ProduceReels: React.FC = () => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % PRODUCE_REELS.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 reveal reveal-stagger-2">
+      {PRODUCE_REELS.map((r, i) => {
+        const active = i === idx;
+        return (
+          <button
+            key={r.produce}
+            type="button"
+            onClick={() => setIdx(i)}
+            className={`relative aspect-[4/5] overflow-hidden bg-ink text-left transition-all duration-500 ${active ? "ring-2 ring-vermillion ring-offset-2 ring-offset-bone" : "opacity-90 hover:opacity-100"}`}
+            aria-label={`View ${r.produce} reduction`}
+          >
+            <img
+              src={r.image}
+              alt={r.produce}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(2,40,89,0.0) 0%, rgba(2,40,89,0.0) 38%, rgba(2,40,89,0.78) 100%)",
+              }}
+            />
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-bone">
+              <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">
+                Murky wash water
+              </span>
+              <span
+                className={`w-2 h-2 rounded-full ${active ? "bg-vermillion" : "bg-bone/40"}`}
+                aria-hidden="true"
+              />
+            </div>
+            <div className="absolute bottom-3 left-3 right-3 text-bone">
+              <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-80">
+                {r.produce}
+              </div>
+              <div className="font-display text-[22px] leading-none mt-1">
+                {r.reduction}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ─── Brand film · Our Ikigai ─────────────────────────────── */
+const BrandFilmSection: React.FC = () => {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <section className="py-24 lg:py-32 bg-bone">
+      <div className="max-w-6xl mx-auto px-6 lg:px-14">
+        <div className="text-center mb-12 reveal">
+          <div className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-graphite mb-3">
+            Why we built this.
+          </div>
+          <h2 className="h-display-l text-ink mb-4 max-w-[20ch] mx-auto">
+            Our <em>Ikigai.</em>
+          </h2>
+        </div>
+
+        <div className="reveal reveal-stagger-2 relative overflow-hidden bg-ink border border-stone aspect-video">
+          {playing ? (
+            <div className="absolute inset-0 flex items-center justify-center text-bone/70 font-mono text-[10.5px] tracking-[0.18em] uppercase">
+              {/* TODO[video]: replace with actual brand film embed
+                  <iframe src="..." className="absolute inset-0 w-full h-full" allow="autoplay; encrypted-media" /> */}
+              Brand film placeholder, swap for embed
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setPlaying(true)}
+              className="absolute inset-0 group"
+              aria-label="Play brand film"
+            >
+              <img
+                src="/concepts/ch06_the_return.webp"
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-70 transition-opacity"
+              />
+              <div className="absolute inset-0 bg-ink/30" />
+              <span className="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-full bg-bone text-ink mx-auto top-1/2 -translate-y-1/2 group-hover:scale-105 transition-transform">
+                <Play size={28} fill="currentColor" />
+              </span>
+              <div className="absolute bottom-5 left-5 font-mono text-[10.5px] tracking-[0.18em] uppercase text-bone/85">
+                1:50 brand film
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 
@@ -613,50 +494,39 @@ interface JournalCardProps {
     category: string;
     title: string;
     excerpt: string;
+    image: string;
     date: string;
   };
-  delay: number;
+  index: number;
 }
-
-const JournalCard: React.FC<JournalCardProps> = ({ post, delay }) => {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <article
-      className={`fade-up stagger-${delay} group cursor-pointer`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div
-        className={`video-placeholder rounded-sm mb-6 transition-all duration-500 ${hovered ? "opacity-90" : ""}`}
-      >
-        <div className="play-icon">
-          <Play size={20} className="text-white ml-0.5" fill="white" />
-        </div>
-      </div>
-      <div>
-        <p className="label-caps text-estoqi-green text-xs mb-3">
-          {post.category}
-        </p>
-        <h3 className="heading-display text-foreground text-xl mb-3 group-hover:text-estoqi-green transition-colors leading-snug">
-          {post.title}
-        </h3>
-        <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-          {post.excerpt}
-        </p>
-        <div className="flex items-center justify-between">
-          <time className="label-caps text-muted-foreground text-xs">
-            {post.date}
-          </time>
-          <span
-            className={`label-caps text-estoqi-green text-xs flex items-center gap-1 transition-all ${hovered ? "gap-2" : ""}`}
-          >
-            Read <ArrowRight size={12} />
-          </span>
-        </div>
-      </div>
-    </article>
-  );
-};
+const JournalCard: React.FC<JournalCardProps> = ({ post, index }) => (
+  <article
+    className={`group reveal reveal-stagger-${(index % 4) + 1}`}
+    data-ocid={`journal.card.${post.id}`}
+  >
+    <div className="relative overflow-hidden bg-ink aspect-[4/3] mb-5">
+      <img
+        src={post.image}
+        alt={post.title}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+      />
+    </div>
+    <div className="label-mono text-vermillion mb-3">{post.category}</div>
+    <h3 className="font-display text-ink text-[22px] leading-[1.25] mb-3 max-w-[28ch] group-hover:text-graphite transition-colors">
+      {post.title}
+    </h3>
+    <p className="text-graphite text-[14.5px] leading-[1.55] max-w-[48ch] mb-4">
+      {post.excerpt}
+    </p>
+    <div className="flex items-center justify-between pt-3 border-t border-stone-soft">
+      <time className="font-mono text-[10.5px] text-graphite tracking-[0.04em]">
+        {post.date}
+      </time>
+      <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-vermillion flex items-center gap-2 group-hover:gap-3 transition-all">
+        Read <ArrowRight size={12} />
+      </span>
+    </div>
+  </article>
+);
 
 export default Home;

@@ -1,435 +1,150 @@
-import { CheckCircle, Loader2, Play, Send } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
-import VideoModal from "../components/VideoModal";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
-import {
-  useAddCommunityStory,
-  useGetCommunityStories,
-} from "../hooks/useQueries";
 
-const placeholderTestimonials = [
+/* =====================================================================
+   ESTOQI · Collective
+   Houses both the community voice AND the at-home reproducible test
+   (moved here from Science per Feb 2026 brief).
+   ===================================================================== */
+
+const HOME_TEST_STEPS = [
   {
-    id: 1,
-    name: "Priya Mehta",
-    location: "Mumbai",
-    quote:
-      "Changed how our entire family thinks about food and water. The produce cleansing is remarkable.",
+    n: "01",
+    title: "Prepare your sample",
+    body: "Take a clean glass. Half-fill with tap water. Add three drops of mustard oil. Stir briefly. The oil sits as visible droplets on the surface, your residue analog.",
   },
   {
-    id: 2,
-    name: "Arjun Kapoor",
-    location: "Delhi",
-    quote:
-      "As a chef, I was skeptical. After 3 months with ESTOQI, I can taste the difference in every dish.",
+    n: "02",
+    title: "Apply to produce",
+    body: "Submerge a tomato, an apple, or a few leaves of spinach. Soak for sixty seconds. Lift the produce out. The oil will have transferred to the surface.",
   },
   {
-    id: 3,
-    name: "Sunita Rao",
-    location: "Bangalore",
-    quote:
-      "My children's health has visibly improved. ESTOQI is the future of home wellness.",
-  },
-  {
-    id: 4,
-    name: "Vikram Singh",
-    location: "Pune",
-    quote:
-      "Our restaurant kitchen transformed overnight. Produce lasts longer, tastes cleaner.",
-  },
-  {
-    id: 5,
-    name: "Ananya Sharma",
-    location: "Chennai",
-    quote:
-      "The science behind ESTOQI is real. I've seen the lab reports. This is not a gimmick.",
-  },
-  {
-    id: 6,
-    name: "Rohan Gupta",
-    location: "Hyderabad",
-    quote:
-      "Best investment we've made for our family's health. The hydration quality is unmatched.",
+    n: "03",
+    title: "Rinse and compare",
+    body: "Rinse one specimen under tap water for ten seconds, the other under Estoqi pH 11.5 wash water. Examine both. Photograph both. Share your result with the Estoqi collective.",
   },
 ];
 
-const badges = [
-  {
-    emoji: "💧",
-    name: "Hydration Pioneer",
-    description:
-      "Awarded to early adopters who embraced ESTOQI's 9.5 pH drinking stream.",
-    color: "bg-estoqi-blue/10 border-estoqi-blue/30 text-estoqi-blue",
-    iconBg: "bg-estoqi-blue/20",
-  },
-  {
-    emoji: "🌿",
-    name: "Clean Eater",
-    description:
-      "Earned by members who complete 30 days of daily produce cleansing with ESTOQI.",
-    color: "bg-estoqi-green/10 border-estoqi-green/30 text-estoqi-green",
-    iconBg: "bg-estoqi-green/20",
-  },
-  {
-    emoji: "⚙️",
-    name: "System Advocate",
-    description:
-      "Granted to members who refer 3 or more households to the ESTOQI system.",
-    color: "bg-estoqi-green/10 border-estoqi-green/30 text-estoqi-green",
-    iconBg: "bg-estoqi-green/20",
-  },
-  {
-    emoji: "☀️",
-    name: "Wellness Trailblazer",
-    description:
-      "Recognized for sharing your ESTOQI wellness journey with the community.",
-    color: "bg-amber-50 border-amber-200 text-amber-700",
-    iconBg: "bg-amber-100",
-  },
-  {
-    emoji: "👑",
-    name: "ESTOQI Elite",
-    description:
-      "The highest honor - awarded to members who embody the ESTOQI philosophy in every aspect of life.",
-    color: "bg-purple-50 border-purple-200 text-purple-700",
-    iconBg: "bg-purple-100",
-  },
+const TESTIMONIALS = [
+  { name: "Priya M.",   location: "Bengaluru",  quote: "The wash water turns visibly amber the first time. After that, you can't unsee it." },
+  { name: "Arjun K.",   location: "Mumbai",     quote: "We pilot-installed two units at our cloud kitchen six months ago. The shelf-life numbers carried the conversation." },
+  { name: "Sunita R.",  location: "Pune",       quote: "I'm a sceptic about wellness claims. The NABL reports are downloadable. That's why I bought one." },
+  { name: "Vikram S.",  location: "Delhi",      quote: "It looks like a piece of laboratory equipment because that's what it is. Beautiful, quiet, and it does one job honestly." },
+  { name: "Ananya S.",  location: "Chennai",    quote: "I ran the home test the day it arrived. The visual difference is the proof; the lab data is the receipt." },
+  { name: "Rohan G.",   location: "Hyderabad",  quote: "Our family's water habit changed overnight. Drinking water is no longer the chore we forget." },
 ];
 
 const Collective: React.FC = () => {
-  const [videoModal, setVideoModal] = useState<{ open: boolean; name: string }>(
-    { open: false, name: "" },
-  );
-  const [formData, setFormData] = useState({
-    name: "",
-    story: "",
-    videoUrl: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const addStory = useAddCommunityStory();
-  const { data: communityStories } = useGetCommunityStories();
-
   useScrollAnimation();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim() || !formData.story.trim()) return;
-
-    try {
-      await addStory.mutateAsync({
-        name: formData.name.trim(),
-        story: formData.story.trim(),
-        videoUrl: formData.videoUrl.trim() || null,
-      });
-      setSubmitted(true);
-      setFormData({ name: "", story: "", videoUrl: "" });
-    } catch (err) {
-      console.error("Failed to submit story:", err);
-    }
-  };
-
   return (
-    <main className="bg-estoqi-off-white">
-      {/* Hero */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-estoqi-dark">
-        <img
-          src="/assets/generated/hero-molecules.dim_1920x1080.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-estoqi-dark/20 to-estoqi-dark/90" />
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-24">
-          <p className="label-caps text-estoqi-green mb-6 animate-slide-up">
-            The Collective
-          </p>
-          <h1
-            className="heading-display text-white text-5xl md:text-7xl mb-6 animate-slide-up"
-            style={{ animationDelay: "0.1s" }}
-          >
-            The ESTOQI
-            <br />
-            collective
-          </h1>
-          <p
-            className="text-white/60 text-lg md:text-xl font-light max-w-2xl mx-auto animate-slide-up"
-            style={{ animationDelay: "0.2s" }}
-          >
-            A growing community of people who have chosen intelligence over
-            habit. Share your story. Inspire the next.
-          </p>
+    <main className="bg-bone text-ink">
+      {/* HERO */}
+      <section className="pt-24 lg:pt-32 pb-16 lg:pb-20 px-6 lg:px-14 border-b border-stone">
+        <div className="max-w-5xl mx-auto">
+          <div className="reveal">
+            <div className="label-eyebrow mb-7">The Collective</div>
+            <h1 className="h-display-xl text-ink mb-7 max-w-[18ch]">
+              People who tested it <em>for themselves.</em>
+            </h1>
+            <p className="font-display text-graphite text-[20px] lg:text-[24px] leading-[1.45] max-w-[58ch] font-light">
+              You don't have to take our word for any of it. Below is a
+              reproducible home test, followed by stories from people who ran
+              it.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Testimonial Grid */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">
-              Community Voices
-            </p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground">
-              Real People.
-              <br />
-              Real Transformation.
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {placeholderTestimonials.map((t, i) => (
-              <div
-                key={t.id}
-                className={`fade-up stagger-${(i % 3) + 1} group cursor-pointer`}
-                onClick={() => setVideoModal({ open: true, name: t.name })}
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  setVideoModal({ open: true, name: t.name })
-                }
-              >
-                {/* Video thumbnail */}
-                <div
-                  className="relative rounded-sm overflow-hidden mb-4"
-                  style={{ aspectRatio: "4/3" }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-estoqi-dark to-[oklch(0.18_0.04_155)]">
-                    <div className="absolute inset-0 bg-estoqi-green/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="play-icon group-hover:scale-110">
-                      <Play
-                        size={22}
-                        className="text-white ml-0.5"
-                        fill="white"
-                      />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-estoqi-dark/60 to-transparent">
-                    <p className="text-white font-medium text-sm">{t.name}</p>
-                    <p className="text-white/50 text-xs">{t.location}</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground text-sm leading-relaxed italic">
-                  "{t.quote}"
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Backend stories */}
-          {communityStories && communityStories.length > 0 && (
-            <div className="mt-16">
-              <h3 className="heading-display text-2xl text-foreground mb-8 text-center fade-up">
-                Community Submissions
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {communityStories.map((story) => (
-                  <div
-                    key={story.name}
-                    className="fade-up glass-white rounded-sm p-6 border border-border"
-                  >
-                    <p className="font-semibold text-foreground mb-2">
-                      {story.name}
-                    </p>
-                    <p className="text-muted-foreground text-sm leading-relaxed italic mb-3">
-                      "{story.story}"
-                    </p>
-                    {story.videoUrl && (
-                      <a
-                        href={story.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="label-caps text-estoqi-blue text-xs hover:underline"
-                      >
-                        Watch Video →
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Submission Form */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-3xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">
-              Share Your Story
-            </p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground">
-              Your Voice
-              <br />
-              Matters
-            </h2>
-            <p className="text-muted-foreground mt-4 max-w-md mx-auto">
-              Share your ESTOQI experience with the community. Your story could
-              inspire someone to make the shift.
-            </p>
-          </div>
-
-          {submitted ? (
-            <div className="fade-up text-center py-16">
-              <div className="w-20 h-20 rounded-full bg-estoqi-green/10 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle size={36} className="text-estoqi-green" />
-              </div>
-              <h3 className="heading-display text-2xl text-foreground mb-3">
-                Story Submitted
-              </h3>
-              <p className="text-muted-foreground mb-8">
-                Thank you for sharing your ESTOQI journey. Your story has been
-                added to the collective.
+      {/* VERIFY IT YOURSELF (moved from Science) */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+            <div className="lg:col-span-5 reveal">
+              <div className="label-eyebrow mb-6">Verify it yourself</div>
+              <h2 className="h-display-l text-ink mb-6 max-w-[18ch]">
+                A protocol you can <em>run at home.</em>
+              </h2>
+              <p className="text-graphite text-[17px] leading-[1.6] max-w-[48ch] mb-6">
+                The oil-on-produce test is a reproducible kitchen experiment
+                that visualizes the difference between plain water and pH 11.5
+                wash water. Twenty minutes, no equipment beyond two glasses.
               </p>
-              <button
-                type="button"
-                onClick={() => setSubmitted(false)}
-                className="btn-primary-estoqi"
-              >
-                Share Another Story
-              </button>
+              <p className="text-graphite text-[15px] leading-[1.6] max-w-[48ch] mb-8">
+                Photograph your before and after, share with the collective,
+                and we'll feature the strongest visual comparisons in the
+                journal.
+              </p>
             </div>
-          ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="fade-up stagger-2 space-y-6"
-            >
-              <div>
-                <label
-                  htmlFor="story-name"
-                  className="label-caps text-foreground/60 block mb-2"
-                >
-                  Your Name *
-                </label>
-                <input
-                  id="story-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Full name"
-                  required
-                  className="w-full border border-border rounded-sm px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-estoqi-green transition-colors bg-white"
-                />
-              </div>
 
-              <div>
-                <label
-                  htmlFor="story-text"
-                  className="label-caps text-foreground/60 block mb-2"
+            <ol className="lg:col-span-7 space-y-3 reveal reveal-stagger-2">
+              {HOME_TEST_STEPS.map((s) => (
+                <li
+                  key={s.n}
+                  className="grid grid-cols-[64px_1fr] gap-6 items-start border-b border-stone-soft pb-7"
                 >
-                  Your Story *
-                </label>
-                <textarea
-                  id="story-text"
-                  value={formData.story}
-                  onChange={(e) =>
-                    setFormData({ ...formData, story: e.target.value })
-                  }
-                  placeholder="Share your ESTOQI experience..."
-                  required
-                  rows={5}
-                  className="w-full border border-border rounded-sm px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-estoqi-green transition-colors bg-white resize-none"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="story-video"
-                  className="label-caps text-foreground/60 block mb-2"
-                >
-                  Video Link{" "}
-                  <span className="text-muted-foreground normal-case font-normal">
-                    (optional)
+                  <span
+                    className="font-display text-vermillion text-[36px] leading-none"
+                    style={{ fontVariationSettings: "'opsz' 48" }}
+                  >
+                    {s.n}
                   </span>
-                </label>
-                <input
-                  id="story-video"
-                  type="url"
-                  value={formData.videoUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, videoUrl: e.target.value })
-                  }
-                  placeholder="https://youtube.com/..."
-                  className="w-full border border-border rounded-sm px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-estoqi-green transition-colors bg-white"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={
-                  addStory.isPending ||
-                  !formData.name.trim() ||
-                  !formData.story.trim()
-                }
-                className="btn-primary-estoqi w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {addStory.isPending ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send size={16} />
-                    Submit Your Story
-                  </>
-                )}
-              </button>
-
-              {addStory.isError && (
-                <p className="text-destructive text-sm text-center">
-                  Something went wrong. Please try again.
-                </p>
-              )}
-            </form>
-          )}
+                  <div>
+                    <h3 className="font-display text-ink text-[22px] mb-2">{s.title}</h3>
+                    <p className="text-graphite text-[15px] leading-[1.6]">{s.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
-      {/* Badges */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16 fade-up">
-            <p className="label-caps text-estoqi-green mb-4">
-              Achievement Badges
-            </p>
-            <h2 className="heading-display text-4xl md:text-5xl text-foreground">
-              Earn Your Place
-              <br />
-              in the Collective
+      {/* TESTIMONIALS */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-paper border-y border-stone">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-12 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">Community voices</div>
+            <h2 className="h-display-l text-ink">
+              Real people. <em>Real switch.</em>
             </h2>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {badges.map((badge, i) => (
-              <div
-                key={badge.name}
-                className={`fade-up stagger-${i + 1} rounded-sm border-2 p-6 text-center ${badge.color} transition-all hover:-translate-y-1 hover:shadow-glass`}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-10">
+            {TESTIMONIALS.map((t, i) => (
+              <figure
+                key={t.name}
+                className={`reveal reveal-stagger-${(i % 4) + 1}`}
               >
-                <div
-                  className={`w-16 h-16 rounded-full ${badge.iconBg} flex items-center justify-center mx-auto mb-4 text-3xl`}
-                >
-                  {badge.emoji}
-                </div>
-                <h3 className="font-semibold text-sm mb-2">{badge.name}</h3>
-                <p className="text-xs leading-relaxed opacity-80">
-                  {badge.description}
-                </p>
-              </div>
+                <blockquote className="font-display text-ink text-[19px] leading-[1.4] mb-5">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="border-t border-stone-soft pt-4">
+                  <div className="label-mono text-ink">{t.name}</div>
+                  <div className="font-mono text-[10.5px] text-graphite mt-1">{t.location}</div>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
       </section>
 
-      <VideoModal
-        isOpen={videoModal.open}
-        onClose={() => setVideoModal({ open: false, name: "" })}
-        title={
-          videoModal.name ? `${videoModal.name}'s Story` : "Community Story"
-        }
-      />
+      {/* SHARE YOUR STORY */}
+      <section className="bg-ink text-bone py-20 lg:py-24 px-6 lg:px-14">
+        <div className="max-w-3xl mx-auto text-center reveal">
+          <span className="rule-vermillion mx-auto mb-8 block" />
+          <h2 className="h-display-l text-bone mb-6 max-w-[20ch] mx-auto">
+            Run the test. <em>Show us what you saw.</em>
+          </h2>
+          <p className="text-bone/65 text-[16.5px] leading-[1.6] mb-10 max-w-[56ch] mx-auto font-light">
+            We collect kitchen-counter side-by-side photos. The best ones go
+            into the journal with credit.
+          </p>
+          <Link to="/journal" className="btn-bone">
+            Read the journal <ArrowRight size={13} />
+          </Link>
+        </div>
+      </section>
     </main>
   );
 };

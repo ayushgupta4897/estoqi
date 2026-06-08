@@ -81,9 +81,9 @@ const FeaturedIn: React.FC = () => {
   return (
     <main className="pt-20">
       {/* ── HERO ── */}
-      <section className="py-28 lg:py-36 bg-estoqi-dark">
+      <section className="py-28 lg:py-36 bg-ink">
         <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
-          <p className="label-caps text-estoqi-green mb-6 animate-slide-up">
+          <p className="label-caps text-vermillion mb-6 animate-slide-up">
             Press & Media
           </p>
           <h1
@@ -103,7 +103,7 @@ const FeaturedIn: React.FC = () => {
       </section>
 
       {/* ── PUBLICATION LOGO GRID ── */}
-      <section className="py-16 bg-estoqi-off-white border-b border-estoqi-dark/5">
+      <section className="py-16 bg-bone border-b border-ink/5">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <p className="label-caps text-muted-foreground text-center mb-10 fade-up">
             As Seen In
@@ -114,10 +114,10 @@ const FeaturedIn: React.FC = () => {
                 key={item.id}
                 href={item.href}
                 onClick={(e) => e.preventDefault()}
-                className="flex items-center justify-center h-16 rounded-sm border border-black/6 bg-estoqi-off-white hover:border-estoqi-green/30 hover:bg-estoqi-green/4 transition-all duration-250 group"
+                className="flex items-center justify-center h-16 rounded-sm border border-black/6 bg-bone hover:border-vermillion/30 hover:bg-vermillion/4 transition-all duration-250 group"
                 aria-label={item.publication}
               >
-                <span className="heading-display text-foreground/30 group-hover:text-estoqi-green text-lg transition-colors font-bold tracking-tight">
+                <span className="heading-display text-foreground/30 group-hover:text-vermillion text-lg transition-colors font-bold tracking-tight">
                   {item.logo}
                 </span>
               </a>
@@ -127,13 +127,13 @@ const FeaturedIn: React.FC = () => {
       </section>
 
       {/* ── PRESS ARTICLES ── */}
-      <section className="py-24 lg:py-32 bg-estoqi-off-white">
+      <section className="py-24 lg:py-32 bg-bone">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16 fade-up">
             <div className="inline-flex items-center gap-2 mb-6 justify-center">
-              <div className="w-8 h-px bg-estoqi-green" />
-              <span className="label-caps text-estoqi-green">Coverage</span>
-              <div className="w-8 h-px bg-estoqi-green" />
+              <div className="w-8 h-px bg-vermillion" />
+              <span className="label-caps text-vermillion">Coverage</span>
+              <div className="w-8 h-px bg-vermillion" />
             </div>
             <h2 className="heading-display text-4xl md:text-5xl text-foreground mb-4">
               Press Coverage
@@ -148,11 +148,11 @@ const FeaturedIn: React.FC = () => {
             {pressFeatures.map((item, i) => (
               <article
                 key={item.id}
-                className={`fade-up stagger-${(i % 3) + 1} group bg-estoqi-cream rounded-sm border border-estoqi-dark/6 p-7 hover:border-estoqi-green/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] transition-all duration-300`}
+                className={`fade-up stagger-${(i % 3) + 1} group bg-paper rounded-sm border border-ink/6 p-7 hover:border-vermillion/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] transition-all duration-300`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <span className="label-caps text-estoqi-green text-xs">
+                    <span className="label-caps text-vermillion text-xs">
                       {item.category}
                     </span>
                     <p className="text-foreground font-semibold text-sm mt-0.5">
@@ -163,7 +163,7 @@ const FeaturedIn: React.FC = () => {
                     {item.date}
                   </time>
                 </div>
-                <h3 className="font-semibold text-foreground text-base leading-snug mb-3 group-hover:text-estoqi-green transition-colors">
+                <h3 className="font-semibold text-foreground text-base leading-snug mb-3 group-hover:text-vermillion transition-colors">
                   {item.headline}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-5">
@@ -172,7 +172,7 @@ const FeaturedIn: React.FC = () => {
                 <a
                   href={item.href}
                   onClick={(e) => e.preventDefault()}
-                  className="inline-flex items-center gap-1.5 label-caps text-estoqi-green text-xs hover:gap-2.5 transition-all"
+                  className="inline-flex items-center gap-1.5 label-caps text-vermillion text-xs hover:gap-2.5 transition-all"
                   aria-label={`Read article from ${item.publication}`}
                 >
                   Read Article <ExternalLink size={11} />
@@ -184,14 +184,14 @@ const FeaturedIn: React.FC = () => {
       </section>
 
       {/* ── PRESS CONTACT ── */}
-      <section className="py-20 bg-estoqi-off-white">
+      <section className="py-20 bg-bone">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center fade-up">
           <div className="inline-flex items-center gap-2 mb-6 justify-center">
-            <div className="w-8 h-px bg-estoqi-green" />
-            <span className="label-caps text-estoqi-green">
+            <div className="w-8 h-px bg-vermillion" />
+            <span className="label-caps text-vermillion">
               Press Enquiries
             </span>
-            <div className="w-8 h-px bg-estoqi-green" />
+            <div className="w-8 h-px bg-vermillion" />
           </div>
           <h2 className="heading-display text-3xl md:text-4xl text-foreground mb-4">
             Media & Press Contact
