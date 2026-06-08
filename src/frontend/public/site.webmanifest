@@ -1,0 +1,14 @@
+{
+  "name": "Estoqi",
+  "short_name": "Estoqi",
+  "description": "India's first dual-stream water ionization. Up to 99% pesticide reduction on produce; pH 9.5 hydrogen-rich water at every tap. NABL-tested.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FEFCF6",
+  "theme_color": "#022859",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
