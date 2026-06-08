@@ -8,16 +8,20 @@ from _lib_openai_image import edit
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-REFERENCE = os.path.join(ROOT, ".assets", "jesal_source.png")
+REFERENCE = os.path.join(ROOT, ".assets", "jesal_source.jpg")
 OUT_PATH = os.path.join(ROOT, "src/frontend/public/concepts/jesal_forbes.webp")
 
 PROMPT = (
     "A Forbes-magazine cover-style editorial portrait of the same man as in the input photo. "
-    "His face, hair, build, skin tone, and identity are preserved exactly from the reference. "
-    "He wears the same charcoal-gray blazer over a dark t-shirt as in the reference.\n\n"
+    "His face, hair (short, brushed back), build (early-thirties Indian man, medium build), "
+    "skin tone, and identity are preserved exactly from the reference. He wears the same "
+    "dark navy button-down shirt with the collar open, exactly as in the reference photo. "
+    "The same warm friendly smile from the reference is preserved — open and approachable, "
+    "the eyes warm.\n\n"
     "Composition: tight three-quarter frame from chest up, eyes meeting the lens directly. "
-    "Expression: warm, intelligent, calmly confident — the considered gaze of a founder who is "
-    "talking about a long project, not posing. A faint, restrained smile, more in the eyes than the mouth.\n\n"
+    "Expression: the same warm easy smile as in the reference photo — confident, "
+    "approachable, the considered gaze of a founder who is comfortable in his own "
+    "company.\n\n"
     "Lighting: a single large soft-box positioned upper-left at about 45 degrees creates gentle "
     "modeling on the face with a clean catchlight in both eyes; a low-bounce fill from the right "
     "opens the shadow side without flattening; a subtle hair-light separates him cleanly from the background.\n\n"

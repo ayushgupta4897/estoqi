@@ -9,17 +9,20 @@ from _lib_openai_image import edit  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 
-REFERENCE = REPO / ".assets" / "jesal_source.png"
+REFERENCE = REPO / ".assets" / "jesal_source.jpg"
 OUT_PATH = REPO / "src" / "frontend" / "public" / "concepts" / "jesal_factory.webp"
 
 PROMPT = (
     "A documentary editorial portrait of the same man as in the input photo, "
     "photographed inside a sophisticated water-technology factory floor that doubles "
     "as a small clean-room laboratory. The man stands three-quarter angle, centered, "
-    "with calm assured posture — one hand resting lightly on a polished stainless rail, "
-    "the other relaxed at his side. He wears the same charcoal-gray blazer over a dark "
-    "t-shirt as in the reference photo. His face, build, hair, skin tone, and overall "
-    "identity are preserved exactly from the reference.\n\n"
+    "with calm assured posture and a warm easy smile (matching his expression in the "
+    "reference) — one hand resting lightly on a polished stainless rail, the other "
+    "relaxed at his side or in his pocket. He wears the same dark navy button-down "
+    "shirt with the collar open and dark trousers with a black belt, exactly as in "
+    "the reference photo. His face, hair (short, brushed back), build (early-thirties "
+    "Indian man, medium build), skin tone, and overall identity are preserved exactly "
+    "from the reference. The warm friendly smile is preserved exactly.\n\n"
     "The setting behind him:\n"
     "- Mid-ground left: a row of bright stainless-steel cylindrical electrolysis chambers "
     "being assembled by two or three technicians in clean white coats and disposable hair "
