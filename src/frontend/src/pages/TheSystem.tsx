@@ -31,8 +31,8 @@ const STAGES: Stage[] = [
     ),
     body: "The process starts with the water already in your pipes, municipal, filtered, whatever you have. No pre-treatment required. The water enters exactly as it is.",
     chips: ["pH 7, neutral", "Untreated tap water"],
-    image: "/concepts/hydration_moment.webp",
-    alt: "A simple drinking glass on a stone counter, the starting point.",
+    image: "/concepts/sys_step01_tap.webp",
+    alt: "An Indian kitchen tap; a hand holds a glass under the flowing stream of ordinary municipal water.",
   },
   {
     number: "02",
@@ -59,8 +59,8 @@ const STAGES: Stage[] = [
     ),
     body: "The mildly alkaline output carries dissolved molecular hydrogen, the smallest molecule in existence, small enough to pass through cell membranes. 1,200 ppb H₂. Negative ORP. For daily drinking, cooking, and hydration, made the moment you turn the tap.",
     chips: ["pH 9.5", "1,200 ppb molecular hydrogen", "Negative ORP"],
-    image: "/concepts/hydration_moment.webp",
-    alt: "A tall glass of clear hydrogen-rich drinking water on a stone counter.",
+    image: "/concepts/sys_step03_drinking.webp",
+    alt: "A tall glass of pH 9.5 hydrogen-rich drinking water with visible micro-bubbles clinging to the inside of the glass.",
   },
   {
     number: "04",
