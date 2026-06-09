@@ -23,6 +23,19 @@ import LabReport from "./pages/LabReport";
 import OurJourney from "./pages/OurJourney";
 import Science from "./pages/Science";
 import TheSystem from "./pages/TheSystem";
+/* Dashboard (gated) */
+import DemoGate from "./dashboard/DemoGate";
+import NetworkHealth from "./dashboard/pages/NetworkHealth";
+import AccountView from "./dashboard/pages/AccountView";
+import SiteView from "./dashboard/pages/SiteView";
+import MachineView from "./dashboard/pages/MachineView";
+import AlertsInbox from "./dashboard/pages/AlertsInbox";
+import Pricing from "./dashboard/pages/Pricing";
+import Operator from "./dashboard/pages/Operator";
+
+const Gated: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <DemoGate>{children}</DemoGate>
+);
 
 // Layout component wrapping all pages.
 // On Home the hero is full-bleed under a transparent Navbar.
@@ -31,6 +44,15 @@ import TheSystem from "./pages/TheSystem";
 const Layout: React.FC = () => {
   const { pathname } = useLocation();
   const isHome = pathname === "/";
+  const isDashboard = pathname.startsWith("/dashboard");
+  if (isDashboard) {
+    // Dashboard owns its own chrome (sidenav, top bar) — render bare.
+    return (
+      <DemoGate>
+        <Outlet />
+      </DemoGate>
+    );
+  }
   return (
     <div className="min-h-screen flex flex-col bg-bone text-ink">
       <Navbar />
@@ -114,6 +136,43 @@ const ourJourneyRoute = createRoute({
   component: OurJourney,
 });
 
+/* ─── Dashboard routes (soft-gated by ?demo=aayush) ────────────── */
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard",
+  component: NetworkHealth,
+});
+const dashboardAccountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/accounts/$id",
+  component: AccountView,
+});
+const dashboardSiteRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/sites/$id",
+  component: SiteView,
+});
+const dashboardMachineRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/machines/$id",
+  component: MachineView,
+});
+const dashboardAlertsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/alerts",
+  component: AlertsInbox,
+});
+const dashboardPricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/pricing",
+  component: Pricing,
+});
+const dashboardOperatorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/operator",
+  component: Operator,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   theSystemRoute,
@@ -128,6 +187,13 @@ const routeTree = rootRoute.addChildren([
   featuredInRoute,
   labReportRoute,
   ourJourneyRoute,
+  dashboardRoute,
+  dashboardAccountRoute,
+  dashboardSiteRoute,
+  dashboardMachineRoute,
+  dashboardAlertsRoute,
+  dashboardPricingRoute,
+  dashboardOperatorRoute,
 ]);
 
 const router = createRouter({ routeTree });
