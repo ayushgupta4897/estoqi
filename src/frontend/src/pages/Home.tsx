@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import JourneySection from "../components/JourneySection";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
 
 /* =====================================================================
@@ -200,9 +199,6 @@ const Home: React.FC = () => {
           <ProduceReels />
         </div>
       </section>
-
-      {/* ────────────────────────────────────────── 3.5 · JOURNEY (watercolor) */}
-      <JourneySection />
 
       {/* ────────────────────────────────────────── 4 · BRAND FILM · OUR IKIGAI */}
       <BrandFilmSection />

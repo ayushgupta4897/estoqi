@@ -19,6 +19,7 @@ const PRIMARY_LINKS: NavLink[] = [
   { to: "/science", label: "Science" },
   { to: "/the-system", label: "The System" },
   { to: "/estoqi-labs", label: "Labs" },
+  { to: "/our-journey", label: "Our Journey" },
   { to: "/for-homes", label: "For Homes" },
   { to: "/for-food-businesses", label: "For Businesses" },
   { to: "/journal", label: "Journal" },

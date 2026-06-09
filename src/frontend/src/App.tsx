@@ -20,6 +20,7 @@ import ForHomes from "./pages/ForHomes";
 import Home from "./pages/Home";
 import Journal from "./pages/Journal";
 import LabReport from "./pages/LabReport";
+import OurJourney from "./pages/OurJourney";
 import Science from "./pages/Science";
 import TheSystem from "./pages/TheSystem";
 
@@ -107,6 +108,11 @@ const labReportRoute = createRoute({
   path: "/labs/reports/$slug",
   component: LabReport,
 });
+const ourJourneyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/our-journey",
+  component: OurJourney,
+});
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -121,6 +127,7 @@ const routeTree = rootRoute.addChildren([
   aboutRoute,
   featuredInRoute,
   labReportRoute,
+  ourJourneyRoute,
 ]);
 
 const router = createRouter({ routeTree });

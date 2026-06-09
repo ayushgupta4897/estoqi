@@ -70,7 +70,14 @@ const WITH: Panel = {
   image: "/concepts/journey/journey_07b_with_estoqi.webp",
 };
 
-const JourneySection: React.FC = () => {
+interface JourneySectionProps {
+  /* "home" (default) renders the in-section title plate. "page" hides
+     the plate because the dedicated /our-journey page provides its own
+     hero + title above this component. */
+  variant?: "home" | "page";
+}
+
+const JourneySection: React.FC<JourneySectionProps> = ({ variant = "home" }) => {
   useScrollAnimation();
 
   return (
@@ -82,19 +89,21 @@ const JourneySection: React.FC = () => {
       }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-14">
-        {/* Title plate */}
-        <div className="text-center mb-16 lg:mb-20 reveal max-w-[760px] mx-auto">
-          <div className="label-eyebrow justify-center mx-auto mb-7">
-            The journey, painted.
+        {/* Title plate — only on home, the /our-journey page has its own */}
+        {variant === "home" && (
+          <div className="text-center mb-16 lg:mb-20 reveal max-w-[760px] mx-auto">
+            <div className="label-eyebrow justify-center mx-auto mb-7">
+              The journey, painted.
+            </div>
+            <h2 className="h-display-l text-ink mb-6">
+              How every Indian vegetable <em>reaches your kitchen.</em>
+            </h2>
+            <p className="font-display text-graphite text-[18px] lg:text-[20px] leading-[1.55] font-light">
+              Six common scenes. Two endings. Painted by hand, watercolour on
+              paper, because some stories were never meant to be told in pixels.
+            </p>
           </div>
-          <h2 className="h-display-l text-ink mb-6">
-            How every Indian vegetable <em>reaches your kitchen.</em>
-          </h2>
-          <p className="font-display text-graphite text-[18px] lg:text-[20px] leading-[1.55] font-light">
-            Six common scenes. Two endings. Painted by hand, watercolour on
-            paper, because some stories were never meant to be told in pixels.
-          </p>
-        </div>
+        )}
 
         {/* Shared 6 panels — alternating image/text */}
         <ol className="space-y-16 lg:space-y-24">
