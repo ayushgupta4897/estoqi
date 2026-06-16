@@ -363,6 +363,43 @@
 }
 
 /* =====================================================================
+   Science · hydrogen-through-membrane diagram primitives
+   ===================================================================== */
+
+@layer components {
+  /* the small H₂ molecule: drifts across and slips through the membrane */
+  .sci-h2 {
+    animation: sci-h2-pass 5.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes sci-h2-pass {
+    0%   { transform: translateX(0) translateY(0); opacity: 0; }
+    8%   { opacity: 1; }
+    46%  { transform: translateX(120px) translateY(-6px); opacity: 1; }
+    54%  { transform: translateX(150px) translateY(4px); opacity: 1; }
+    92%  { transform: translateX(252px) translateY(-2px); opacity: 1; }
+    100% { transform: translateX(268px) translateY(0); opacity: 0; }
+  }
+
+  /* large antioxidants: approach the membrane and are turned back */
+  .sci-big {
+    animation: sci-big-bounce 4.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    will-change: transform;
+  }
+  @keyframes sci-big-bounce {
+    0%   { transform: translateX(0); }
+    42%  { transform: translateX(96px); }
+    50%  { transform: translateX(108px); }
+    58%  { transform: translateX(96px); }
+    100% { transform: translateX(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sci-h2, .sci-big { animation: none; }
+  }
+}
+
+/* =====================================================================
    Sentinel, neutralize any leftover AI-slop utilities from the old design
    ===================================================================== */
 @layer utilities {
