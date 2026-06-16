@@ -14,37 +14,6 @@ import Wordmark from "./Wordmark";
 const Footer: React.FC = () => {
   return (
     <footer className="text-bone" style={{ backgroundColor: "var(--forest)" }}>
-      {/* ── Accreditation strip ── */}
-      <div
-        className="border-b"
-        style={{ borderColor: "var(--forest-line)" }}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-14 py-6 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
-          {[
-            { abbr: "NABL", line: "Accredited testing" },
-            { abbr: "SGS", line: "SGS India lab" },
-            { abbr: "ENV", line: "Environcare lab" },
-            { abbr: "FSSAI", line: "Compliant methodology" },
-          ].map((a) => (
-            <div
-              key={a.abbr}
-              className="border-t pt-2"
-              style={{ borderColor: "var(--forest-line)" }}
-            >
-              <div
-                className="font-display text-bone text-[18px] leading-none"
-                style={{ fontVariationSettings: "'opsz' 32" }}
-              >
-                {a.abbr}
-              </div>
-              <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-bone/60 mt-1">
-                {a.line}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── Main footer block ── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-14 py-10 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-y-10 gap-x-10">

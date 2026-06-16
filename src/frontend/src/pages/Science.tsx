@@ -132,8 +132,8 @@ const Science: React.FC = () => {
       {/* ─── 1 · BANNER ────────────────────────────────────────── */}
       <section className="relative min-h-[50vh] overflow-hidden border-b border-stone">
         <img
-          src="/concepts/sci_lab_bench.webp"
-          alt="A working modern science laboratory bench."
+          src="/concepts/science_hero.webp"
+          alt="A tall straight-sided glass of water on a worn dark-oak counter, the lowercase Estoqi wordmark etched into the front of the glass, water mid-pour from above."
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div
@@ -214,14 +214,6 @@ const Science: React.FC = () => {
           <h2 className="h-display-l text-bone mb-6 max-w-[22ch] mx-auto">
             See it for yourself, <em>at your kitchen counter.</em>
           </h2>
-          <div className="flex flex-wrap gap-3 justify-center mt-6">
-            <Link to="/the-system" className="btn-bone">
-              How the machine works <ArrowRight size={13} />
-            </Link>
-            <Link to="/estoqi-labs" className="btn-ghost text-bone">
-              Explore the lab reports <ArrowRight size={13} />
-            </Link>
-          </div>
         </div>
       </section>
     </main>

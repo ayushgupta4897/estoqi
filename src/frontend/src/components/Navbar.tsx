@@ -22,6 +22,7 @@ const PRIMARY_LINKS: NavLink[] = [
   { to: "/our-journey", label: "Our Journey" },
   { to: "/for-homes", label: "For Homes" },
   { to: "/for-food-businesses", label: "For Businesses" },
+  { to: "/about", label: "About" },
   { to: "/journal", label: "Journal" },
 ];
 
@@ -79,7 +80,7 @@ const Navbar: React.FC = () => {
             className="inline-flex items-center"
             aria-label="Estoqi home"
           >
-            <Wordmark size="nav" tone={isTransparent ? "bone" : "ink"} />
+            <Wordmark size="nav" tone={isTransparent ? "bone" : "ink"} withMark />
           </a>
 
           <nav className="hidden lg:flex items-center gap-8">
@@ -128,7 +129,7 @@ const Navbar: React.FC = () => {
               className="inline-flex items-center"
               aria-label="Estoqi home"
             >
-              <Wordmark size="nav" tone="bone" />
+              <Wordmark size="nav" tone="bone" withMark />
             </a>
             <button
               type="button"
