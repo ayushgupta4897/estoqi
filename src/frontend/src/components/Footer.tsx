@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Linkedin } from "lucide-react";
 import type React from "react";
 import { SiInstagram, SiYoutube } from "react-icons/si";
-import Wordmark from "./Wordmark";
+import Logo from "./Logo";
 
 /* =====================================================================
    ESTOQI · Footer (compressed)
@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-y-10 gap-x-10">
           {/* Brand block */}
           <div>
-            <Wordmark size="display" tone="bone" />
+            <Logo tone="bone" markHeight={48} />
             <p className="text-bone/70 text-[14px] leading-[1.6] max-w-[40ch] mt-4">
               Dual-stream ionization for the household kitchen and the
               commercial line. Engineered in India, third-party tested,
