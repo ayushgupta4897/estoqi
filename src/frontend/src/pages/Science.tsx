@@ -1,356 +1,339 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, Minus, Plus, Play } from "lucide-react";
+import { ArrowDown, ArrowRight, Play } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
 
 /* =====================================================================
-   ESTOQI · Science (Feb 2026 brand brief)
-   Section order:
-     1 Banner
-     2 Four Questions (each with a clip placeholder)
-     3 Explore the pH Spectrum
-     4 The Science, Indexed (term grid with hover/click reveal)
+   ESTOQI · Science (Jun 2026 — client narrative)
+   One machine, two waters. A guided read, top to bottom:
+
+     1  Hero            "Water, restructured."  + inline pH dial
+     2  Intro           "is rinsing actually enough?"
+     3  The Washing Water
+         · the problem      (rinsing ≠ washing)
+         · pH wash scale    (drag toward 11.5, residue lets go)
+         · the fix          (saponification, two-stream split)
+     4  The Drinking Water
+         · antioxidant      ORP meter (drag the needle past zero)
+         · goes deeper      hydrogen-through-membrane diagram
+     5  Closing CTA     "And that's the whole idea."
+     6  Four short films
    ===================================================================== */
-
-interface QA {
-  number: string;
-  q: string;
-  clipLabel: string;
-  body: React.ReactNode;
-}
-
-const QAS: QA[] = [
-  {
-    number: "01",
-    q: "What is pH? And why does normal water fail?",
-    clipLabel: "Clip 01 · 1:24",
-    body: (
-      <>
-        <p>
-          pH is a logarithmic measure of how acidic or alkaline a solution is.
-          Plain tap water sits near pH 7, which is exactly the chemistry
-          pesticide compounds were engineered to survive. The waxy outer
-          surface of most produce is hydrophobic, oil-based residues bond to
-          it and repel neutral water completely.
-        </p>
-        <p>
-          Estoqi's pH 11.5 stream crosses the saponification threshold, the
-          same effect that lets soap lift grease. Nothing added. Nothing
-          dosed. Water, restructured.
-        </p>
-      </>
-    ),
-  },
-  {
-    number: "02",
-    q: "How is Estoqi water made? And how does it remove pesticides?",
-    clipLabel: "Clip 02 · 1:42",
-    body: (
-      <>
-        <p>
-          Ordinary tap water passes through a chamber holding surgical-grade
-          titanium electrodes. A controlled current splits the water into two
-          ionic streams in parallel: alkaline (cathode) at pH 11.5 for
-          washing produce, and mildly alkaline (anode) at pH 9.5 carrying
-          dissolved molecular hydrogen for drinking.
-        </p>
-        <p>
-          The pH 11.5 stream emulsifies oil-bound residues on contact, the
-          same mechanism behind industrial cleaning, but expressed through
-          water and electricity alone.
-        </p>
-      </>
-    ),
-  },
-  {
-    number: "03",
-    q: "What is ORP, and how do antioxidants relate?",
-    clipLabel: "Clip 03 · 1:18",
-    body: (
-      <>
-        <p>
-          ORP, Oxidation-Reduction Potential, is the electrical potential of a
-          solution measured in millivolts. Positive ORP = oxidizing. Negative
-          ORP = reducing, i.e. antioxidant.
-        </p>
-        <p>
-          Tap water typically measures +200 to +600 mV. Estoqi drinking water
-          measures negative, between -200 and -450 mV, the same principle that
-          makes antioxidant-rich foods useful, delivered through every glass.
-        </p>
-      </>
-    ),
-  },
-  {
-    number: "04",
-    q: "What is hydrogen-rich drinking water?",
-    clipLabel: "Clip 04 · 1:36",
-    body: (
-      <>
-        <p>
-          Molecular hydrogen (H₂) is the smallest molecule that exists.
-          Because of its size, it penetrates cell membranes, crosses the
-          blood-brain barrier, and reaches the mitochondria, areas that
-          larger antioxidants cannot access.
-        </p>
-        <p>
-          Estoqi's drinking stream consistently delivers 1,200 ppb dissolved
-          molecular hydrogen, one of the highest concentrations achievable
-          continuously at home, measured via dissolved-H₂ meters calibrated to
-          ISO standards.
-        </p>
-      </>
-    ),
-  },
-];
-
-interface RefTile {
-  symbol: string;
-  unit: string;
-  category: string;
-  short: string;
-  source: string;
-}
-const REF_TILES: RefTile[] = [
-  { symbol: "pH",   unit: "Potential of Hydrogen",     category: "Chemistry", short: "Logarithmic measure of hydrogen-ion activity. Each pH unit is a 10× change in acidity or alkalinity.", source: "IUPAC Compendium · 2014" },
-  { symbol: "ORP",  unit: "Oxidation-Reduction",       category: "Redox",     short: "Solution's tendency to donate or accept electrons, measured in millivolts. Negative ORP behaves as an antioxidant.", source: "Standard Methods for Water Analysis · 23rd ed." },
-  { symbol: "H₂",   unit: "Molecular hydrogen",        category: "Hydrogen",  short: "Smallest molecule in existence. Crosses cell membranes and the blood-brain barrier. Selective antioxidant.", source: "Ohsawa et al. · Nature Medicine 13 (2007)" },
-  { symbol: "NMR",  unit: "Nuclear magnetic resonance", category: "Spectroscopy", short: "Used to measure water cluster size. Smaller clusters correlate with faster cellular absorption.", source: "IS 17872 · NMR methods for water" },
-  { symbol: "TiO₂", unit: "Titanium electrode",        category: "Electrolysis", short: "Inert, non-leaching electrode material used in Estoqi's chamber. Standard for medical-grade equipment.", source: "ASTM F67 · Titanium grade-4" },
-  { symbol: "EC",   unit: "Electrolysis chamber",      category: "Process",   short: "The cell where current splits water into alkaline and acidic streams continuously, without chemical input.", source: "Faraday's first law of electrolysis" },
-  { symbol: "mV",   unit: "Millivolt scale",           category: "Redox",     short: "Unit of ORP. The more negative the reading, the greater the reducing (antioxidant) potential.", source: "ISO 11271 · 2002" },
-  { symbol: "ppb",  unit: "Parts per billion",         category: "Measurement", short: "Standard unit for dissolved H₂ concentration. Therapeutic research typically cites 200–1,600 ppb.", source: "ISO 7980" },
-  { symbol: "60+",  unit: "Independent lab tests",     category: "Verification", short: "Estoqi has commissioned more than 60 independent NABL-accredited tests across produce categories.", source: "Estoqi Lab Index · 2024–2026" },
-];
 
 const Science: React.FC = () => {
   useScrollAnimation();
 
   return (
     <main className="bg-bone text-ink">
-      {/* ─── 1 · BANNER ────────────────────────────────────────── */}
-      <section className="relative min-h-[50vh] overflow-hidden border-b border-stone">
-        <img
-          src="/concepts/sci_lab_bench.webp"
-          alt="A working modern science laboratory bench."
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(13,13,13,0.4) 0%, rgba(13,13,13,0.1) 30%, rgba(13,13,13,0.0) 60%, rgba(13,13,13,0.55) 100%), linear-gradient(90deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.0) 50%)",
-          }}
-        />
-        <div className="relative z-10 px-6 lg:px-14 pt-24 pb-20">
-          <div className="max-w-5xl mx-auto">
-            <div className="label-eyebrow text-bone mb-7">
-              <span style={{ background: "var(--bone)" }} className="inline-block w-7 h-px" />
-              The Science
-            </div>
-            <h1 className="h-display-xl text-bone mb-7 max-w-[18ch]">
-              The science behind <em>Estoqi.</em>
-            </h1>
-            <p className="font-display text-bone/80 text-[20px] lg:text-[24px] leading-[1.45] max-w-[60ch] font-light">
-              Four questions, four answers, a pH spectrum you can play with,
-              and an index of every term you'll hear us use, in plain language.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 2 · FOUR QUESTIONS ────────────────────────────────── */}
-      <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-14 max-w-[680px] reveal">
-            <div className="label-eyebrow mb-6">Four questions</div>
-            <h2 className="h-display-l text-ink mb-6 max-w-[20ch]">
-              Four questions, <em>four answers.</em>
-            </h2>
-            <p className="text-graphite text-[17px] leading-[1.6] max-w-[56ch]">
-              Each answer comes paired with a short clip from our 7-minute
-              demo film. Read, watch, or both.
-            </p>
-          </div>
-
-          <div className="space-y-5">
-            {QAS.map((qa, i) => (
-              <QABlock key={qa.number} qa={qa} defaultOpen={i === 0} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 3 · pH SPECTRUM ────────────────────────────────────── */}
-      <PhSpectrum />
-
-      {/* ─── 4 · SCIENCE, INDEXED ──────────────────────────────── */}
-      <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-14 max-w-[680px] reveal">
-            <div className="label-eyebrow mb-6">The Science, indexed</div>
-            <h2 className="h-display-l text-ink mb-6 max-w-[24ch]">
-              The vocabulary, <em>in plain language.</em>
-            </h2>
-            <p className="text-graphite text-[17px] leading-[1.6] max-w-[58ch]">
-              Hover or tap any term for a one-sentence explanation and the
-              source we used.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 lg:gap-4">
-            {REF_TILES.map((t) => (
-              <RefCard key={t.symbol} tile={t} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── CTA ────────────────────────────────────────────────── */}
-      <section className="bg-ink text-bone py-20 lg:py-24 px-6 lg:px-14">
-        <div className="max-w-3xl mx-auto text-center reveal">
-          <span className="rule-vermillion mx-auto mb-8 block" />
-          <h2 className="h-display-l text-bone mb-6 max-w-[22ch] mx-auto">
-            See it for yourself, <em>at your kitchen counter.</em>
-          </h2>
-          <div className="flex flex-wrap gap-3 justify-center mt-6">
-            <Link to="/the-system" className="btn-bone">
-              How the machine works <ArrowRight size={13} />
-            </Link>
-            <Link to="/estoqi-labs" className="btn-ghost text-bone">
-              Explore the lab reports <ArrowRight size={13} />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <Hero />
+      <Intro />
+      <WashingWater />
+      <DrinkingWater />
+      <Closing />
+      <FilmStrip />
     </main>
   );
 };
 
-/* ─── QABlock ────────────────────────────────────────────── */
-interface QABlockProps {
-  qa: QA;
-  defaultOpen: boolean;
-}
-const QABlock: React.FC<QABlockProps> = ({ qa, defaultOpen }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  const [playing, setPlaying] = useState(false);
-  return (
-    <article className={`border bg-paper transition-colors ${open ? "border-ink" : "border-stone"}`}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full grid grid-cols-[64px_1fr_32px] items-center gap-4 lg:gap-6 px-6 lg:px-8 py-6 lg:py-7 text-left"
-        aria-expanded={open}
-      >
-        <span
-          className={`font-display text-[36px] leading-none ${open ? "text-vermillion" : "text-graphite"}`}
-          style={{ fontVariationSettings: "'opsz' 48" }}
-        >
-          {qa.number}
-        </span>
-        <span className="font-display text-ink text-[18px] md:text-[22px] leading-[1.3]">
-          {qa.q}
-        </span>
-        <span className="text-graphite justify-self-end" aria-hidden="true">
-          {open ? <Minus size={20} /> : <Plus size={20} />}
-        </span>
-      </button>
-      {open && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6 lg:gap-10 px-6 lg:px-8 pb-8">
-          {/* video clip placeholder */}
-          <div className="relative bg-ink aspect-video overflow-hidden border border-stone">
-            {playing ? (
-              <div className="absolute inset-0 flex items-center justify-center text-bone/70 font-mono text-[10px] tracking-[0.18em] uppercase">
-                {/* TODO[video]: replace with clip embed */}
-                {qa.clipLabel} · embed placeholder
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setPlaying(true)}
-                className="absolute inset-0 group"
-                aria-label={`Play ${qa.clipLabel}`}
-              >
-                <img
-                  src="/concepts/ch04_the_water.webp"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
-                />
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-bone text-ink group-hover:scale-105 transition-transform">
-                    <Play size={20} fill="currentColor" />
-                  </span>
-                </span>
-                <div className="absolute bottom-3 left-3 font-mono text-[9.5px] tracking-[0.18em] uppercase text-bone/85">
-                  {qa.clipLabel}
-                </div>
-              </button>
-            )}
+/* ─── 1 · HERO ─────────────────────────────────────────────── */
+const Hero: React.FC = () => (
+  <section
+    id="science-top"
+    className="relative min-h-[72vh] overflow-hidden border-b border-stone"
+  >
+    <img
+      src="/concepts/science_hero.webp"
+      alt="A tall glass of water on a dark-oak counter, the lowercase Estoqi wordmark etched into the glass, water mid-pour from above."
+      className="absolute inset-0 w-full h-full object-cover"
+    />
+    <div
+      className="absolute inset-0"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(13,13,13,0.45) 0%, rgba(13,13,13,0.12) 32%, rgba(13,13,13,0.0) 58%, rgba(13,13,13,0.6) 100%), linear-gradient(90deg, rgba(13,13,13,0.6) 0%, rgba(13,13,13,0.0) 52%)",
+      }}
+    />
+    <div className="relative z-10 px-6 lg:px-14 pt-28 pb-20 min-h-[72vh] flex flex-col justify-end">
+      <div className="max-w-6xl mx-auto w-full">
+        <div className="grid lg:grid-cols-[1fr_auto] items-end gap-12">
+          <div className="max-w-[40ch]">
+            <div className="label-eyebrow text-bone mb-7">The Science</div>
+            <h1 className="h-display-xl text-bone mb-7">
+              Water, <em>restructured.</em>
+            </h1>
+            <p className="font-display text-bone/80 text-[20px] lg:text-[24px] leading-[1.45] max-w-[54ch] font-light">
+              Engineered to lift pesticides off your produce, and pour
+              antioxidant, hydrogen-rich water into your glass.
+            </p>
+            <a
+              href="#the-problem"
+              className="inline-flex items-center gap-2 mt-9 font-mono text-[10.5px] tracking-[0.2em] uppercase text-bone/90 hover:text-bone transition-colors"
+            >
+              Explore the science
+              <ArrowDown size={14} />
+            </a>
           </div>
-          <div className="text-graphite text-[16px] leading-[1.65] space-y-3 max-w-[56ch]">
-            {qa.body}
+
+          {/* signature pH dial */}
+          <PhDialChip />
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const PhDialChip: React.FC = () => (
+  <div className="hidden lg:block w-[260px] shrink-0 border border-bone/25 bg-ink/35 backdrop-blur-sm p-6">
+    <div className="flex items-center justify-between font-mono text-[9.5px] tracking-[0.16em] uppercase text-bone/65">
+      <span>tap water · 7.0</span>
+      <span className="text-bone">Estoqi · 11.5</span>
+    </div>
+    <div className="mt-5 mb-2 h-1.5 rounded-full overflow-hidden bg-bone/15">
+      <div
+        className="h-full w-full"
+        style={{
+          background:
+            "linear-gradient(90deg, #8a5a1d 0%, #d4d4d4 50%, #143d75 76%, #022859 100%)",
+        }}
+      />
+    </div>
+    <div className="flex items-baseline gap-2 mt-6">
+      <span
+        className="font-display text-bone leading-none text-[68px]"
+        style={{ fontVariationSettings: "'opsz' 144" }}
+      >
+        11.5
+      </span>
+      <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-bone/60">
+        pH
+      </span>
+    </div>
+    <p className="mt-4 text-bone/70 text-[12.5px] leading-[1.5]">
+      The exact point water starts lifting grease.
+    </p>
+  </div>
+);
+
+/* ─── 2 · INTRO ────────────────────────────────────────────── */
+const Intro: React.FC = () => (
+  <section className="py-24 lg:py-32 px-6 lg:px-14 bg-paper border-b border-stone">
+    <div className="max-w-4xl mx-auto reveal">
+      <div className="label-eyebrow mb-8">The whole idea, start to finish</div>
+      <p className="font-display text-ink text-[26px] md:text-[34px] lg:text-[40px] leading-[1.28] tracking-[-0.015em] font-light max-w-[24ch]">
+        It begins with a question every kitchen has at the sink:{" "}
+        <em>is rinsing actually enough?</em>
+      </p>
+    </div>
+  </section>
+);
+
+/* ─── 3 · THE WASHING WATER ────────────────────────────────── */
+const WashingWater: React.FC = () => (
+  <>
+    {/* the problem */}
+    <section
+      id="the-problem"
+      className="py-24 lg:py-32 px-6 lg:px-14 bg-bone scroll-mt-24"
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-14 max-w-[680px] reveal">
+          <div className="label-eyebrow mb-6">The washing water</div>
+          <h2 className="h-display-l text-ink mb-7 max-w-[18ch]">
+            Rinsing your vegetables isn't the same as <em>washing them.</em>
+          </h2>
+        </div>
+
+        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-start">
+          <div className="text-graphite text-[16.5px] leading-[1.68] space-y-5 max-w-[58ch] reveal">
+            <p>
+              Here's the uncomfortable part: pesticides aren't water-soluble.
+              They're oily, built to cling to the waxy skin of produce and shrug
+              off rain, irrigation, even a hard scrub under the tap. So when you
+              rinse, the water beads up and rolls away, leaving the residue
+              right where it started.
+            </p>
+            <p>
+              It all comes down to one number,{" "}
+              <span className="text-ink font-medium">pH</span> — simply how
+              acidic or alkaline water is. Your tap sits at{" "}
+              <span className="text-ink font-medium">pH 7</span>, dead neutral,
+              and neutral water is powerless against an oily film.
+            </p>
+          </div>
+
+          <figure className="border border-stone bg-paper p-7 lg:p-8 reveal">
+            <blockquote className="font-display text-ink text-[28px] lg:text-[34px] leading-[1.18] tracking-[-0.015em]">
+              Cold water on a greasy pan.
+            </blockquote>
+            <figcaption className="mt-5 label-mono text-vermillion">
+              That's your tap, every single rinse
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    {/* interactive · pH wash scale */}
+    <PhWashScale />
+
+    {/* the fix */}
+    <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-14 max-w-[700px] reveal">
+          <div className="label-eyebrow mb-6">The fix</div>
+          <h2 className="h-display-l text-ink mb-7 max-w-[20ch]">
+            So we taught water to lift grease, <em>the way soap does.</em>
+          </h2>
+          <div className="text-graphite text-[16.5px] leading-[1.68] space-y-5 max-w-[58ch]">
+            <p>
+              Soap cleans through an effect called{" "}
+              <span className="text-ink font-medium">saponification</span>: it
+              loosens oily grime so it can finally rinse away. Estoqi reaches
+              that exact tipping point using only water and a little
+              electricity. Tap water flows past surgical-grade titanium plates
+              carrying a gentle current, and that current restructures the water
+              itself.
+            </p>
+            <p>
+              Out comes a stream at{" "}
+              <span className="text-ink font-medium">pH 11.5</span> — alkaline
+              enough to break the oily pesticide film on contact and wash it
+              down the drain. The same science as industrial cleaning, expressed
+              through water and electricity.
+            </p>
           </div>
         </div>
-      )}
-    </article>
-  );
-};
 
-/* ─── pH spectrum slider ──────────────────────────────────── */
-const PhSpectrum: React.FC = () => {
-  const [value, setValue] = useState(11.5);
+        <StreamSplit />
+      </div>
+    </section>
+  </>
+);
 
-  const tone = useMemo(() => {
-    if (value <= 4) return { label: "Acidic", body: "Coffee, soda, lemon juice. Eats away enamel; not for drinking long-term.", color: "#9c3b1f" };
-    if (value < 7) return { label: "Mildly acidic", body: "Rainwater, fresh-pressed juices. Roughly neutral on the body.", color: "#b25c2d" };
-    if (value < 8) return { label: "Neutral", body: "Tap water, RO water. Cannot remove oil-bound pesticide residue.", color: "#525252" };
-    if (value < 10) return { label: "Mildly alkaline", body: "Estoqi drinking stream at pH 9.5. Smaller clusters, dissolved hydrogen, negative ORP.", color: "#022859" };
-    if (value < 11.5) return { label: "Alkaline", body: "Approaching the saponification threshold. Begins to lift oil-bound residue.", color: "#143d75" };
-    if (value < 13) return { label: "High-alkaline · wash water", body: "Estoqi wash stream at pH 11.5. Emulsifies oil-bound pesticide residue on contact.", color: "#022859" };
-    return { label: "Caustic", body: "Drain cleaners and industrial degreasers. Not safe for produce.", color: "#9c3b1f" };
+/* ─── Interactive #1 · pH wash scale ───────────────────────── */
+const RESIDUE = [
+  { x: 12, y: 28, r: 7, t: 10.5 },
+  { x: 30, y: 64, r: 5, t: 10.7 },
+  { x: 44, y: 22, r: 8, t: 10.9 },
+  { x: 58, y: 58, r: 6, t: 11.0 },
+  { x: 70, y: 34, r: 5, t: 11.1 },
+  { x: 82, y: 66, r: 7, t: 11.2 },
+  { x: 22, y: 46, r: 4, t: 11.3 },
+  { x: 64, y: 78, r: 5, t: 11.4 },
+  { x: 88, y: 40, r: 4, t: 11.5 },
+];
+
+const PhWashScale: React.FC = () => {
+  const [value, setValue] = useState(7);
+
+  const lifting = value >= 10.5;
+  const released = RESIDUE.filter((d) => value >= d.t).length;
+  const state = useMemo(() => {
+    if (value < 8)
+      return { label: "Neutral · residue stays", color: "var(--graphite)" };
+    if (value < 10.5)
+      return { label: "Alkaline · nearly there", color: "var(--leaf)" };
+    if (value < 11.5)
+      return { label: "Residue lifting", color: "var(--vermillion)" };
+    return { label: "Estoqi wash · residue gone", color: "var(--vermillion)" };
   }, [value]);
 
   return (
     <section className="py-24 lg:py-32 px-6 lg:px-14 bg-paper border-y border-stone">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-12 max-w-[680px] reveal">
-          <div className="label-eyebrow mb-6">The pH spectrum</div>
-          <h2 className="h-display-l text-ink mb-6 max-w-[22ch]">
-            Where Estoqi sits, <em>and why it matters.</em>
-          </h2>
-          <p className="text-graphite text-[17px] leading-[1.6] max-w-[56ch]">
-            Drag the slider. The whole pH spectrum, with the two Estoqi
-            streams marked as anchors.
-          </p>
+        <div className="mb-10 max-w-[640px] reveal">
+          <div className="label-mono text-vermillion mb-4">
+            Interactive · pH scale
+          </div>
+          <h3 className="h-display-m text-ink max-w-[20ch]">
+            Drag toward Estoqi, <em>and watch the residue let go.</em>
+          </h3>
         </div>
 
         <div className="bg-bone border border-stone p-7 lg:p-10 reveal">
-          <div className="flex items-baseline justify-between mb-3">
+          {/* produce surface with oil-bound residue */}
+          <div className="relative h-44 lg:h-52 overflow-hidden border border-stone-soft bg-paper mb-9">
             <div
-              className="font-display text-[64px] lg:text-[88px] leading-none"
+              className="absolute inset-x-0 bottom-0 h-1/2"
               style={{
-                fontVariationSettings: "'opsz' 144",
-                color: tone.color,
+                background:
+                  "linear-gradient(180deg, rgba(2,40,89,0.04) 0%, rgba(2,40,89,0.10) 100%)",
+              }}
+            />
+            <span className="absolute bottom-3 left-4 font-mono text-[9px] tracking-[0.16em] uppercase text-graphite">
+              produce surface · oil-bound residue
+            </span>
+            {RESIDUE.map((d, i) => {
+              const gone = value >= d.t;
+              return (
+                <span
+                  key={`${d.x}-${d.y}`}
+                  aria-hidden="true"
+                  className="absolute rounded-full"
+                  style={{
+                    left: `${d.x}%`,
+                    top: `${d.y}%`,
+                    width: d.r * 2,
+                    height: d.r * 2,
+                    background:
+                      "radial-gradient(circle at 35% 30%, rgba(138,90,29,0.95), rgba(138,90,29,0.55))",
+                    boxShadow: "0 1px 2px rgba(138,90,29,0.35)",
+                    opacity: gone ? 0 : 0.9,
+                    transform: gone
+                      ? "translateY(60px) scale(0.5)"
+                      : "translateY(0) scale(1)",
+                    transition:
+                      "opacity 500ms ease, transform 700ms cubic-bezier(0.5,0,0.5,1)",
+                    transitionDelay: `${i * 18}ms`,
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* readout */}
+          <div className="flex items-end justify-between mb-3">
+            <div className="flex items-baseline gap-3">
+              <span
+                className="font-display leading-none text-[56px] lg:text-[76px]"
+                style={{
+                  fontVariationSettings: "'opsz' 144",
+                  color: state.color,
+                }}
+              >
+                {value.toFixed(1)}
+              </span>
+              <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-graphite">
+                pH
+              </span>
+            </div>
+            <div
+              className="label-mono text-right"
+              style={{
+                color: lifting ? "var(--vermillion)" : "var(--graphite)",
               }}
             >
-              {value.toFixed(1)}
-            </div>
-            <div className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-graphite">
-              pH
+              {released}/{RESIDUE.length} lifted
             </div>
           </div>
 
-          <div className="relative mt-6 mb-8">
-            {/* gradient track */}
+          {/* track */}
+          <div className="relative mt-6 mb-9">
             <div
               className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full"
               style={{
                 background:
-                  "linear-gradient(90deg, #9c3b1f 0%, #b25c2d 18%, #d9b46b 30%, #c8c8c8 45%, #6b8e5f 60%, #143d75 75%, #022859 88%, #9c3b1f 100%)",
+                  "linear-gradient(90deg, #8a5a1d 0%, #c9a06a 18%, #d4d4d4 42%, #9fb0c8 60%, #143d75 80%, #022859 100%)",
               }}
             />
+            {/* soap-effect threshold marker at 10.5 */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2"
+              style={{ left: `${(10.5 / 14) * 100}%` }}
+            >
+              <span className="block w-px h-7 -translate-x-1/2 bg-ink/40" />
+            </div>
             <input
               type="range"
               min={0}
@@ -360,49 +343,36 @@ const PhSpectrum: React.FC = () => {
               onChange={(e) => setValue(Number.parseFloat(e.target.value))}
               className="ph-spectrum-slider relative w-full"
               aria-label="pH value"
+              aria-valuetext={`pH ${value.toFixed(1)}, ${state.label}`}
             />
-            {/* anchor labels for Estoqi streams */}
-            <div className="absolute top-full mt-3 left-0 right-0 flex justify-between font-mono text-[9.5px] tracking-[0.14em] uppercase text-graphite">
+            <div className="absolute top-full mt-3 left-0 right-0 flex justify-between font-mono text-[9px] tracking-[0.12em] uppercase text-graphite">
               <span>0</span>
-              <span>7</span>
+              <span>7 · tap</span>
+              <span>10.5 · soap-effect</span>
               <span>14</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-3 sm:gap-6 mt-8 pt-6 border-t border-stone-soft">
-            <div className="label-mono text-vermillion">{tone.label}</div>
-            <p className="text-graphite text-[14.5px] leading-[1.6] max-w-[56ch]">
-              {tone.body}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-stone-soft">
-            <button
-              type="button"
-              onClick={() => setValue(9.5)}
-              className="text-left group"
-            >
-              <div className="label-mono text-graphite mb-1">Drinking stream</div>
-              <div
-                className="font-display text-ink text-[28px] leading-none group-hover:text-vermillion transition-colors"
-                style={{ fontVariationSettings: "'opsz' 48" }}
+          <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3 sm:gap-6 mt-10 pt-6 border-t border-stone-soft">
+            <div className="label-mono" style={{ color: state.color }}>
+              {state.label}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setValue(7)}
+                className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite hover:text-ink border border-stone hover:border-ink px-4 py-2 transition-colors"
               >
-                Jump to 9.5
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setValue(11.5)}
-              className="text-left group"
-            >
-              <div className="label-mono text-graphite mb-1">Wash stream</div>
-              <div
-                className="font-display text-ink text-[28px] leading-none group-hover:text-vermillion transition-colors"
-                style={{ fontVariationSettings: "'opsz' 48" }}
+                Tap water · 7.0
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue(11.5)}
+                className="font-mono text-[10px] tracking-[0.14em] uppercase text-bone bg-vermillion border border-vermillion px-4 py-2 hover:bg-leaf hover:border-leaf transition-colors"
               >
-                Jump to 11.5
-              </div>
-            </button>
+                Estoqi wash · 11.5
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -410,48 +380,466 @@ const PhSpectrum: React.FC = () => {
   );
 };
 
-/* ─── RefCard with hover/click reveal ─────────────────────── */
-const RefCard: React.FC<{ tile: RefTile }> = ({ tile }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <article
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
-      tabIndex={0}
-      onClick={() => setOpen((o) => !o)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setOpen((o) => !o);
-        }
-      }}
-      className={`relative bg-paper border p-5 lg:p-6 cursor-pointer transition-colors focus:outline-none ${open ? "border-ink" : "border-stone hover:border-ink"}`}
-    >
-      <div className="flex items-baseline justify-between mb-2">
-        <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-graphite">
-          {tile.category}
+/* ─── Two-stream split diagram ─────────────────────────────── */
+const StreamSplit: React.FC = () => (
+  <div className="reveal">
+    <div className="grid md:grid-cols-2 border border-stone bg-paper">
+      {/* cathode · wash */}
+      <div className="p-7 lg:p-9 border-b md:border-b-0 md:border-r border-stone">
+        <div className="flex items-center justify-between mb-5">
+          <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-graphite">
+            Cathode −
+          </span>
+          <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-vermillion">
+            wash
+          </span>
         </div>
-        <ChevronRight size={14} className={`text-graphite transition-transform ${open ? "rotate-90" : ""}`} />
+        <div
+          className="font-display text-ink leading-none text-[44px] lg:text-[52px]"
+          style={{ fontVariationSettings: "'opsz' 64" }}
+        >
+          pH 11.5
+        </div>
+        <p className="mt-4 text-graphite text-[14.5px] leading-[1.6] max-w-[34ch]">
+          Alkaline stream that emulsifies oil-bound residue on contact.
+        </p>
       </div>
-      <div
-        className="font-display text-ink text-[36px] lg:text-[42px] leading-none mb-1"
-        style={{ fontVariationSettings: "'opsz' 64" }}
-      >
-        {tile.symbol}
+      {/* anode · drink */}
+      <div className="p-7 lg:p-9">
+        <div className="flex items-center justify-between mb-5">
+          <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-graphite">
+            Anode +
+          </span>
+          <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-leaf">
+            drink
+          </span>
+        </div>
+        <div
+          className="font-display text-ink leading-none text-[44px] lg:text-[52px]"
+          style={{ fontVariationSettings: "'opsz' 64" }}
+        >
+          pH 9.5
+        </div>
+        <p className="mt-4 text-graphite text-[14.5px] leading-[1.6] max-w-[34ch]">
+          Mildly alkaline, carries dissolved molecular hydrogen.
+        </p>
       </div>
-      <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite">
-        {tile.unit}
-      </div>
-      {open && (
-        <div className="mt-4 pt-4 border-t border-stone-soft">
-          <p className="text-graphite text-[13.5px] leading-[1.55] mb-3">{tile.short}</p>
-          <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-vermillion">
-            Source · {tile.source}
+    </div>
+    <p className="mt-7 font-display text-ink text-[20px] lg:text-[24px] leading-[1.4] max-w-[40ch]">
+      One current in. <em>Two waters out</em> — a wash for your food, a drink
+      for you.
+    </p>
+  </div>
+);
+
+/* ─── 4 · THE DRINKING WATER ───────────────────────────────── */
+const DrinkingWater: React.FC = () => (
+  <>
+    {/* antioxidant */}
+    <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone border-t border-stone">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-14 max-w-[700px] reveal">
+          <div className="label-eyebrow mb-6">The drinking water</div>
+          <h2 className="h-display-l text-ink mb-7 max-w-[20ch]">
+            The water you drink doesn't just hydrate, <em>it fights back.</em>
+          </h2>
+          <div className="text-graphite text-[16.5px] leading-[1.68] space-y-5 max-w-[58ch]">
+            <p>
+              Plain water is mildly{" "}
+              <span className="text-ink font-medium">oxidizing</span>:
+              chemically, it nudges your body toward the everyday wear and tear
+              we blame on free radicals. There's a scale for this, called{" "}
+              <span className="text-ink font-medium">ORP</span>, measured in
+              millivolts. The more positive the number, the more oxidizing the
+              water.
+            </p>
+            <p>
+              Estoqi's drinking stream flips that number{" "}
+              <span className="text-ink font-medium">negative</span>, down to
+              around <span className="text-ink font-medium">−350 mV</span>.
+              Negative means antioxidant: the very property that makes berries,
+              green tea and leafy greens good for you, now pouring straight from
+              your tap.
+            </p>
           </div>
         </div>
-      )}
+      </div>
+
+      <OrpMeter />
+    </section>
+
+    {/* goes deeper · hydrogen */}
+    <section className="py-24 lg:py-32 px-6 lg:px-14 bg-paper border-y border-stone">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-14 max-w-[700px] reveal">
+          <div className="label-mono text-vermillion mb-4">Goes deeper</div>
+          <h2 className="h-display-l text-ink mb-7 max-w-[24ch]">
+            And it carries the one antioxidant{" "}
+            <em>small enough to reach everywhere.</em>
+          </h2>
+          <div className="text-graphite text-[16.5px] leading-[1.68] space-y-5 max-w-[58ch]">
+            <p>
+              Most antioxidants are large molecules. They help, but they're too
+              big to slip inside your cells, where much of the damage actually
+              happens.
+            </p>
+            <p>
+              <span className="text-ink font-medium">Hydrogen (H₂)</span> is the
+              smallest molecule that exists, so it reaches where the others
+              can't: through cell walls, across the blood-brain barrier, all the
+              way to the mitochondria. Every glass of Estoqi drinking water
+              carries about{" "}
+              <span className="text-ink font-medium">1,200 ppb</span> of
+              dissolved hydrogen, among the highest you can get continuously at
+              home.
+            </p>
+          </div>
+        </div>
+
+        <HydrogenDiagram />
+      </div>
+    </section>
+  </>
+);
+
+/* ─── Interactive #2 · ORP meter ───────────────────────────── */
+const ORP_MIN = -450;
+const ORP_MAX = 600;
+const orpPct = (v: number) => ((v - ORP_MIN) / (ORP_MAX - ORP_MIN)) * 100;
+
+const OrpMeter: React.FC = () => {
+  const [value, setValue] = useState(400);
+  const antioxidant = value < 0;
+
+  return (
+    <div className="max-w-5xl mx-auto reveal">
+      <div className="mb-8 max-w-[640px]">
+        <div className="label-mono text-vermillion mb-4">
+          Interactive · ORP meter
+        </div>
+        <h3 className="h-display-m text-ink max-w-[24ch]">
+          From +400 to −350: the difference between{" "}
+          <em>rusting and protecting.</em>
+        </h3>
+      </div>
+
+      <div className="bg-bone border border-stone p-7 lg:p-10">
+        <div className="flex items-end justify-between mb-8">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="font-display leading-none text-[56px] lg:text-[80px]"
+              style={{
+                fontVariationSettings: "'opsz' 144",
+                color: antioxidant
+                  ? "var(--vermillion)"
+                  : "var(--amber-runoff)",
+              }}
+            >
+              {value > 0 ? `+${value}` : value}
+            </span>
+            <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-graphite">
+              mV
+            </span>
+          </div>
+          <div
+            className="label-mono text-right"
+            style={{
+              color: antioxidant ? "var(--vermillion)" : "var(--amber-runoff)",
+            }}
+          >
+            {antioxidant ? "reducing · antioxidant" : "oxidizing"}
+          </div>
+        </div>
+
+        {/* meter track */}
+        <div className="relative mt-6 mb-9">
+          <div
+            className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full"
+            style={{
+              background:
+                "linear-gradient(90deg, #022859 0%, #143d75 24%, #d4d4d4 52%, #c9a06a 76%, #8a5a1d 100%)",
+            }}
+          />
+          {/* zero marker */}
+          <div
+            className="absolute top-1/2 -translate-y-1/2"
+            style={{ left: `${orpPct(0)}%` }}
+          >
+            <span className="block w-px h-8 -translate-x-1/2 bg-ink/45" />
+            <span className="absolute top-9 left-1/2 -translate-x-1/2 font-mono text-[9px] tracking-[0.14em] uppercase text-graphite">
+              0
+            </span>
+          </div>
+          <input
+            type="range"
+            min={ORP_MIN}
+            max={ORP_MAX}
+            step={10}
+            value={value}
+            onChange={(e) => setValue(Number.parseInt(e.target.value, 10))}
+            className="ph-spectrum-slider relative w-full"
+            aria-label="ORP value in millivolts"
+            aria-valuetext={`${value} millivolts, ${
+              antioxidant ? "antioxidant" : "oxidizing"
+            }`}
+          />
+          <div className="absolute top-full mt-3 left-0 right-0 flex justify-between font-mono text-[9px] tracking-[0.12em] uppercase text-graphite">
+            <span>−450 · antioxidant</span>
+            <span>+600 · oxidizing</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 mt-12 pt-6 border-t border-stone-soft">
+          <button
+            type="button"
+            onClick={() => setValue(400)}
+            className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite hover:text-ink border border-stone hover:border-ink px-4 py-2 transition-colors"
+          >
+            Tap water · +400
+          </button>
+          <button
+            type="button"
+            onClick={() => setValue(-350)}
+            className="font-mono text-[10px] tracking-[0.14em] uppercase text-bone bg-vermillion border border-vermillion px-4 py-2 hover:bg-leaf hover:border-leaf transition-colors"
+          >
+            Estoqi · −350
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Interactive #3 · hydrogen-through-membrane diagram ────── */
+const BIG_MOLECULES = [
+  { label: "vit C", y: 26, delay: "0s", size: 30 },
+  { label: "CoQ10", y: 66, delay: "1.4s", size: 38 },
+];
+const H2_MOLECULES = [
+  { y: 40, delay: "0s" },
+  { y: 54, delay: "1.7s" },
+  { y: 30, delay: "3.1s" },
+];
+
+const HydrogenDiagram: React.FC = () => (
+  <div className="reveal border border-stone bg-bone p-7 lg:p-10">
+    <div className="relative h-64 lg:h-72 overflow-hidden">
+      {/* zone labels */}
+      <span className="absolute top-0 left-2 font-mono text-[9px] tracking-[0.14em] uppercase text-graphite">
+        bloodstream
+      </span>
+      <span className="absolute top-0 right-2 font-mono text-[9px] tracking-[0.14em] uppercase text-vermillion">
+        cell · mitochondria
+      </span>
+
+      {/* cell membrane */}
+      <div
+        className="absolute top-0 bottom-0"
+        style={{ left: "48%" }}
+        aria-hidden="true"
+      >
+        <span className="block w-[3px] h-full bg-vermillion/30" />
+        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90 whitespace-nowrap font-mono text-[8.5px] tracking-[0.2em] uppercase text-graphite bg-bone px-2">
+          cell membrane
+        </span>
+      </div>
+
+      {/* mitochondria target glow */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          right: "8%",
+          top: "50%",
+          width: 120,
+          height: 120,
+          transform: "translateY(-50%)",
+          background:
+            "radial-gradient(circle, rgba(2,40,89,0.10) 0%, rgba(2,40,89,0.0) 70%)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* large antioxidants — turned back at the membrane */}
+      {BIG_MOLECULES.map((m) => (
+        <div
+          key={m.label}
+          className="sci-big absolute flex items-center justify-center rounded-full border border-amber-runoff/50 text-amber-runoff"
+          style={{
+            left: "4%",
+            top: `${m.y}%`,
+            width: m.size,
+            height: m.size,
+            animationDelay: m.delay,
+            background:
+              "radial-gradient(circle at 35% 30%, rgba(138,90,29,0.22), rgba(138,90,29,0.08))",
+          }}
+        >
+          <span className="font-mono text-[8px] tracking-[0.04em]">
+            {m.label}
+          </span>
+        </div>
+      ))}
+
+      {/* tiny H₂ — slips through to the mitochondria */}
+      {H2_MOLECULES.map((m, i) => (
+        <div
+          key={`h2-${m.y}-${i}`}
+          className="sci-h2 absolute flex items-center justify-center rounded-full text-bone"
+          style={{
+            left: "6%",
+            top: `${m.y}%`,
+            width: 22,
+            height: 22,
+            animationDelay: m.delay,
+            background: "var(--vermillion)",
+            boxShadow: "0 0 0 4px rgba(2,40,89,0.12)",
+          }}
+        >
+          <span className="font-mono text-[8px]">H₂</span>
+        </div>
+      ))}
+
+      {/* caption */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-2 font-mono text-[9px] tracking-[0.14em] uppercase text-graphite">
+        only the tiny one gets through
+        <ArrowRight size={12} className="text-vermillion" />
+      </div>
+    </div>
+
+    <div className="mt-8 pt-6 border-t border-stone-soft flex flex-wrap items-baseline justify-between gap-4">
+      <p className="font-display text-ink text-[20px] lg:text-[24px] leading-[1.35] max-w-[34ch]">
+        Only the smallest molecule gets <em>all the way in.</em>
+      </p>
+      <div className="flex items-baseline gap-2">
+        <span
+          className="font-display text-vermillion leading-none text-[40px] lg:text-[48px]"
+          style={{ fontVariationSettings: "'opsz' 64" }}
+        >
+          1,200
+        </span>
+        <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-graphite">
+          ppb H₂
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── 5 · CLOSING ──────────────────────────────────────────── */
+const Closing: React.FC = () => (
+  <section className="bg-ink text-bone py-24 lg:py-32 px-6 lg:px-14">
+    <div className="max-w-3xl mx-auto text-center reveal">
+      <span
+        className="rule-vermillion mx-auto mb-9 block"
+        style={{ background: "var(--bone)" }}
+      />
+      <h2 className="h-display-l text-bone mb-7 max-w-[20ch] mx-auto">
+        And that's the whole idea.{" "}
+        <em>Just water, electricity, and a smarter glass.</em>
+      </h2>
+      <p className="text-bone/70 text-[16.5px] leading-[1.7] max-w-[52ch] mx-auto mb-11">
+        One machine that washes what you eat and pours what you drink.
+        Engineered to lift pesticides off your produce, and pour antioxidant,
+        hydrogen-rich water into your glass.
+      </p>
+      <Link to="/book-consultation" className="btn-bone">
+        Pre-order Estoqi
+        <ArrowRight size={14} />
+      </Link>
+    </div>
+  </section>
+);
+
+/* ─── 6 · FOUR SHORT FILMS ─────────────────────────────────── */
+interface Film {
+  number: string;
+  duration: string;
+  title: string;
+}
+const FILMS: Film[] = [
+  {
+    number: "01",
+    duration: "1:24",
+    title: "What is pH, and why tap water fails",
+  },
+  { number: "02", duration: "1:42", title: "How Estoqi water is made" },
+  { number: "03", duration: "1:18", title: "ORP and antioxidants, explained" },
+  { number: "04", duration: "1:36", title: "Hydrogen-rich drinking water" },
+];
+
+const FilmStrip: React.FC = () => (
+  <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone">
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-12 flex flex-wrap items-end justify-between gap-6 reveal">
+        <div className="max-w-[560px]">
+          <div className="label-eyebrow mb-6">In four short films</div>
+          <h2 className="h-display-l text-ink max-w-[16ch]">
+            Watch the <em>science.</em>
+          </h2>
+        </div>
+        <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-graphite">
+          scroll →
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 reveal">
+        {FILMS.map((f) => (
+          <FilmCard key={f.number} film={f} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const FilmCard: React.FC<{ film: Film }> = ({ film }) => {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <article className="border border-stone bg-paper">
+      <div className="relative aspect-[3/4] bg-ink overflow-hidden">
+        {playing ? (
+          <div className="absolute inset-0 flex items-center justify-center text-bone/70 font-mono text-[9.5px] tracking-[0.18em] uppercase text-center px-4">
+            {/* TODO[video]: replace with Clip {film.number} embed */}
+            Clip {film.number} · embed placeholder
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPlaying(true)}
+            className="absolute inset-0 group"
+            aria-label={`Play clip ${film.number}: ${film.title}`}
+          >
+            <img
+              src="/concepts/ch04_the_water.webp"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-55 group-hover:opacity-70 transition-opacity"
+            />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-bone text-ink group-hover:scale-105 transition-transform">
+                <Play size={18} fill="currentColor" />
+              </span>
+            </span>
+            <span className="absolute top-3 left-3 font-mono text-[9px] tracking-[0.18em] uppercase text-bone/85">
+              Replace with Clip {film.number}
+            </span>
+          </button>
+        )}
+      </div>
+      <div className="p-5">
+        <div className="flex items-baseline justify-between mb-3">
+          <span
+            className="font-display text-vermillion text-[28px] leading-none"
+            style={{ fontVariationSettings: "'opsz' 48" }}
+          >
+            {film.number}
+          </span>
+          <span className="font-mono text-[9.5px] tracking-[0.16em] uppercase text-graphite">
+            {film.duration}
+          </span>
+        </div>
+        <p className="font-display text-ink text-[16px] leading-[1.3]">
+          {film.title}
+        </p>
+      </div>
     </article>
   );
 };

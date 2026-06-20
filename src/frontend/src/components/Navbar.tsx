@@ -2,12 +2,12 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import Wordmark from "./Wordmark";
+import Logo from "./Logo";
 
 /* =====================================================================
    ESTOQI · Navbar
    - Transparent over hero on Home (light text), solid bone elsewhere.
-   - Wordmark in Fraunces with italic "oqi" Cormorant suffix.
+   - Official Estoqi logo (mark + wordmark), navy on light / light on dark.
    - Mobile sheet for narrow viewports.
    ===================================================================== */
 
@@ -19,8 +19,10 @@ const PRIMARY_LINKS: NavLink[] = [
   { to: "/science", label: "Science" },
   { to: "/the-system", label: "The System" },
   { to: "/estoqi-labs", label: "Labs" },
+  { to: "/our-journey", label: "Our Journey" },
   { to: "/for-homes", label: "For Homes" },
   { to: "/for-food-businesses", label: "For Businesses" },
+  { to: "/about", label: "About" },
   { to: "/journal", label: "Journal" },
 ];
 
@@ -60,15 +62,15 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const linkColor = isTransparent ? "text-bone/85 hover:text-bone" : "text-graphite hover:text-ink";
+  const linkColor = isTransparent
+    ? "text-bone/85 hover:text-bone"
+    : "text-graphite hover:text-ink";
 
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${
-          isTransparent
-            ? "bg-transparent"
-            : "bg-bone border-b border-stone"
+          isTransparent ? "bg-transparent" : "bg-bone border-b border-stone"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-14 flex items-center justify-between h-[68px]">
@@ -78,7 +80,7 @@ const Navbar: React.FC = () => {
             className="inline-flex items-center"
             aria-label="Estoqi home"
           >
-            <Wordmark size="nav" tone={isTransparent ? "bone" : "ink"} />
+            <Logo tone={isTransparent ? "bone" : "ink"} markHeight={34} />
           </a>
 
           <nav className="hidden lg:flex items-center gap-8">
@@ -127,7 +129,7 @@ const Navbar: React.FC = () => {
               className="inline-flex items-center"
               aria-label="Estoqi home"
             >
-              <Wordmark size="nav" tone="bone" />
+              <Logo tone="bone" markHeight={34} />
             </a>
             <button
               type="button"

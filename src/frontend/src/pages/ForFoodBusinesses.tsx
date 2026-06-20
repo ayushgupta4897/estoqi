@@ -44,11 +44,6 @@ const WHY_CARDS = [
     title: "A BRSR line item that pays for itself",
     body: "Water-only process, no effluent, reduced food waste. Estoqi delivers a documented Scope 3 reduction your sustainability team can put directly into BRSR disclosures.",
   },
-  {
-    n: "04",
-    title: "Zero capital expenditure",
-    body: "No upfront machine cost. Estoqi installs the unit, you pay per kilogram processed. Scale up or down with demand. No lock-in beyond the pilot.",
-  },
 ];
 
 const FAQS = [
@@ -104,8 +99,7 @@ const ForFoodBusinesses: React.FC = () => {
             </h1>
             <p className="font-display text-bone/80 text-[20px] lg:text-[24px] leading-[1.45] max-w-[58ch] font-light mb-8">
               Estoqi installs the technology at your facility and processes
-              produce using only water. No capital expenditure. Pay only for
-              what we cleanse.
+              produce using only water.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/book-consultation" className="btn-bone">

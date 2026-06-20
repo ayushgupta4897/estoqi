@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Play } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
-import JourneySection from "../components/JourneySection";
+import { useState } from "react";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
 
 /* =====================================================================
@@ -18,29 +17,6 @@ import { useScrollAnimation } from "../hooks/useIntersectionObserver";
      8 Journal preview
      (footer)
    ===================================================================== */
-
-const PRODUCE_REELS = [
-  {
-    produce: "Tomato",
-    reduction: "94% pesticides",
-    image: "/concepts/proof/proof_tomato.webp",
-  },
-  {
-    produce: "Spinach",
-    reduction: "96% pesticides",
-    image: "/concepts/proof/proof_spinach.webp",
-  },
-  {
-    produce: "Grapes",
-    reduction: "88% pesticides",
-    image: "/concepts/proof/proof_grapes.webp",
-  },
-  {
-    produce: "Coriander",
-    reduction: "93% pesticides",
-    image: "/concepts/proof/proof_coriander.webp",
-  },
-];
 
 const journalPosts = [
   {
@@ -72,37 +48,6 @@ const journalPosts = [
   },
 ];
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Priya M.",
-    location: "Bengaluru",
-    quote:
-      "The wash-water turns visibly amber the first time. After that, you can't unsee it. I haven't bought a single bottled produce-wash since.",
-  },
-  {
-    id: 2,
-    name: "Arjun K.",
-    location: "Mumbai",
-    quote:
-      "We pilot-installed two units at our cloud kitchen six months ago. The shelf-life numbers carried the conversation; the spoilage saved paid back the install in four months.",
-  },
-  {
-    id: 3,
-    name: "Sunita R.",
-    location: "Pune",
-    quote:
-      "I'm a sceptic about wellness claims. The NABL reports are downloadable. That's why I bought one.",
-  },
-  {
-    id: 4,
-    name: "Vikram S.",
-    location: "Delhi",
-    quote:
-      "It looks like a piece of laboratory equipment because that's what it is. Beautiful, quiet, and it does one job. I want every appliance in my kitchen to be this honest.",
-  },
-];
-
 const Home: React.FC = () => {
   useScrollAnimation();
 
@@ -112,8 +57,17 @@ const Home: React.FC = () => {
       <section className="relative h-screen min-h-[680px] overflow-hidden">
         <img
           src="/concepts/signature_hero.webp"
-          alt="A colander of fresh garden produce being rinsed with ionized water."
+          alt="A colander of fresh garden produce being rinsed with ionized water; the murky amber runoff in the glass bowl below."
           className="absolute inset-0 w-full h-full object-cover"
+          /* Per founder feedback: shift the image right and up so the
+             murky-water bowl gets more frame. transform + scale gives
+             us real pan control where object-position alone wouldn't,
+             since the source image is close to the viewport aspect. */
+          style={{
+            objectPosition: "65% 80%",
+            transform: "scale(1.10)",
+            transformOrigin: "65% 80%",
+          }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
@@ -125,10 +79,6 @@ const Home: React.FC = () => {
 
         <div className="absolute inset-x-0 bottom-0 z-10 px-6 lg:px-14 pb-14 lg:pb-16">
           <div className="max-w-[920px]">
-            <div className="label-eyebrow text-bone mb-5">
-              <span style={{ background: "var(--bone)" }} className="inline-block w-7 h-px" />
-              India's first dual-stream ionizer , NABL accredited
-            </div>
             <h1 className="h-display-xl text-bone max-w-[16ch] mb-5">
               The wash that <em>actually</em> washes.
             </h1>
@@ -183,26 +133,8 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* ────────────────────────────────────────── 3 · CLEAN-LOOKING ≠ SAFE */}
-      <section className="py-24 lg:py-32 bg-bone">
-        <div className="max-w-7xl mx-auto px-6 lg:px-14">
-          <div className="max-w-[640px] mb-12 reveal">
-            <div className="label-eyebrow mb-6">A closer look</div>
-            <h2 className="h-display-l text-ink mb-6">
-              Your produce is clean-looking. <em>That doesn't make it safe.</em>
-            </h2>
-            <p className="text-graphite text-[17px] leading-[1.6]">
-              Across our independent tests, the wash water consistently runs
-              visibly murky. The residue is real, plain water just can't see
-              it.
-            </p>
-          </div>
-          <ProduceReels />
-        </div>
-      </section>
-
-      {/* ────────────────────────────────────────── 3.5 · JOURNEY (watercolor) */}
-      <JourneySection />
+      {/* ────────────────────────────────────────── 3 · HEAR IT FROM OUR FOUNDER */}
+      <FounderVoicesSection />
 
       {/* ────────────────────────────────────────── 4 · BRAND FILM · OUR IKIGAI */}
       <BrandFilmSection />
@@ -217,7 +149,7 @@ const Home: React.FC = () => {
             </h2>
             <p className="text-graphite text-[17px] leading-[1.6] mb-7 max-w-[48ch]">
               Estoqi's chamber splits ordinary tap water into two ionized
-              streams, each calibrated for a different purpose, on demand.
+              streams, each calibrated for a different purpose.
             </p>
             <Link to="/the-system" className="btn-ink">
               See how it works <ArrowRight size={13} />
@@ -227,14 +159,14 @@ const Home: React.FC = () => {
             <div className="relative aspect-[4/5] overflow-hidden bg-ink">
               <img src="/concepts/hydration_moment.webp" alt="A glass of clear ionized water." className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute bottom-3 left-3 right-3 text-bone">
-                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Stream 01</div>
+                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Estoqi Aqua</div>
                 <div className="font-display text-[20px] leading-none mt-1">pH 9.5</div>
               </div>
             </div>
             <div className="relative aspect-[4/5] overflow-hidden bg-ink">
               <img src="/concepts/r2_process_water.webp" alt="Ionized wash water arcing onto spinach." className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute bottom-3 left-3 right-3 text-bone">
-                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Stream 02</div>
+                <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">Estoqi Clean</div>
                 <div className="font-display text-[20px] leading-none mt-1">pH 11.5</div>
               </div>
             </div>
@@ -277,7 +209,7 @@ const Home: React.FC = () => {
                 </h3>
                 <p className="text-graphite text-[15px] leading-[1.6] mb-6 max-w-[48ch]">
                   Fits at your kitchen counter. Connects to your existing tap.
-                  Two outlets, two outputs, wash water and drinking water, for
+                  Produces two outputs &mdash; wash water and drinking water, for
                   every meal, every day.
                 </p>
                 <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-vermillion inline-flex items-center gap-2 group-hover:gap-3 transition-all">
@@ -304,49 +236,13 @@ const Home: React.FC = () => {
                   Cleaner produce. <em>Defensible food safety.</em>
                 </h3>
                 <p className="text-graphite text-[15px] leading-[1.6] mb-6 max-w-[48ch]">
-                  Estoqi installs and owns the equipment. You pay per kilogram
-                  processed. Built for cold chains, cloud kitchens,
-                  quick-commerce, hospitals, and food exporters.
+                  Built for cloud kitchens, quick-commerce, hospitals,
+                  food manufacturers, and food exporters.
                 </p>
                 <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-oxide inline-flex items-center gap-2 group-hover:gap-3 transition-all">
-                  Talk to our B2B team <ArrowRight size={13} />
+                  Explore Estoqi for Businesses <ArrowRight size={13} />
                 </span>
               </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ────────────────────────────────────────── 7 · TESTIMONIALS */}
-      <section className="py-24 lg:py-32 bg-paper border-y border-stone">
-        <div className="max-w-7xl mx-auto px-6 lg:px-14">
-          <div className="max-w-[720px] mb-16 reveal">
-            <div className="label-eyebrow mb-6">The Collective</div>
-            <h2 className="h-display-l text-ink">
-              People who switched, <em>and stayed.</em>
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-            {testimonials.map((t, i) => (
-              <figure
-                key={t.id}
-                className={`reveal reveal-stagger-${(i % 4) + 1}`}
-              >
-                <blockquote className="font-display text-ink text-[22px] lg:text-[26px] leading-[1.35] mb-6">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <figcaption className="flex items-center gap-3 pt-4 border-t border-stone-soft">
-                  <div className="label-mono text-ink">{t.name}</div>
-                  <div className="font-mono text-[10.5px] text-graphite">
-                    , {t.location}
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-          <div className="mt-12 reveal">
-            <Link to="/collective" className="btn-ink">
-              Join the collective <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -387,59 +283,153 @@ const Home: React.FC = () => {
   );
 };
 
-/* ─── Produce reels (rotating placeholders) ──────────────── */
-const ProduceReels: React.FC = () => {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % PRODUCE_REELS.length), 4200);
-    return () => clearInterval(t);
-  }, []);
 
+/* ─── Hear it from our Founder · horizontally-scrolling video reel ─── */
+/* TODO[video]: replace each entry's `video` with the real Founder-talks-
+ * about-this-produce MP4 URL when the shoots come back. Keep the
+ * `poster` images as the freeze frames so the reel stays visually
+ * complete in offline screenshots and the like. */
+interface FounderClip {
+  produce: string;
+  poster: string;
+  /** When set, the click opens a fullscreen player; otherwise a
+   *  placeholder overlay says "video coming". */
+  video?: string;
+  durationLabel?: string;
+}
+
+const FOUNDER_CLIPS: FounderClip[] = [
+  { produce: "Pesticides on Tomato",    poster: "/concepts/proof/proof_tomato.webp",    durationLabel: "1:18" },
+  { produce: "Pesticides on Okra",      poster: "/concepts/specimen_brinjal.webp",      durationLabel: "1:02" },
+  { produce: "Pesticides on Spinach",   poster: "/concepts/proof/proof_spinach.webp",   durationLabel: "0:54" },
+  { produce: "Pesticides on Grapes",    poster: "/concepts/proof/proof_grapes.webp",    durationLabel: "1:11" },
+  { produce: "Pesticides on Coriander", poster: "/concepts/proof/proof_coriander.webp", durationLabel: "0:48" },
+  { produce: "Pesticides on Apple",     poster: "/concepts/specimen_apple.webp",        durationLabel: "1:04" },
+  { produce: "Pesticides on Capsicum",  poster: "/concepts/specimen_broccoli.webp",     durationLabel: "0:57" },
+];
+
+const FounderVoicesSection: React.FC = () => {
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 reveal reveal-stagger-2">
-      {PRODUCE_REELS.map((r, i) => {
-        const active = i === idx;
-        return (
-          <button
-            key={r.produce}
-            type="button"
-            onClick={() => setIdx(i)}
-            className={`relative aspect-[4/5] overflow-hidden bg-ink text-left transition-all duration-500 ${active ? "ring-1 ring-ink ring-offset-2 ring-offset-bone" : "opacity-85 hover:opacity-100"}`}
-            aria-label={`View ${r.produce} reduction`}
-          >
-            <img
-              src={r.image}
-              alt={r.produce}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+    <section className="py-24 lg:py-32 bg-bone">
+      <div className="max-w-7xl mx-auto px-6 lg:px-14">
+        <div className="max-w-[760px] mb-12 reveal">
+          <div className="label-eyebrow mb-6">Hear it from our Founder</div>
+          <h2 className="h-display-l text-ink mb-6">
+            Your produce is clean-looking. <em>That doesn't make it safe.</em>
+          </h2>
+          <p className="text-graphite text-[17px] leading-[1.6] max-w-[58ch]">
+            Watch the wash water come back amber, every single time. The same
+            produce, the same plain tap, the same one minute &mdash;
+            <em> pesticides removed.</em>
+          </p>
+        </div>
+
+        <div className="reveal reveal-stagger-2 relative -mx-6 lg:-mx-14">
+          <div className="overflow-x-auto px-6 lg:px-14 pb-6 scroll-smooth snap-x snap-mandatory" style={{ scrollbarWidth: "thin" }}>
+            <ul className="flex gap-4 lg:gap-5">
+              {FOUNDER_CLIPS.map((clip, i) => {
+                const playing = playingIdx === i;
+                return (
+                  <li
+                    key={clip.produce}
+                    className="snap-start shrink-0 w-[260px] sm:w-[300px] lg:w-[340px]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setPlayingIdx(i)}
+                      className="group relative aspect-[9/12] w-full overflow-hidden bg-ink text-left"
+                      aria-label={`Play: ${clip.produce}`}
+                    >
+                      <img
+                        src={clip.poster}
+                        alt={clip.produce}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(180deg, rgba(13,13,13,0.05) 0%, rgba(13,13,13,0.05) 40%, rgba(13,13,13,0.78) 100%)",
+                        }}
+                      />
+                      {/* Play affordance */}
+                      <span className="absolute top-3 left-3 inline-flex items-center justify-center w-10 h-10 rounded-full bg-bone/90 text-ink shadow-sm group-hover:bg-bone transition-colors">
+                        <Play size={14} fill="currentColor" />
+                      </span>
+                      {clip.durationLabel && (
+                        <span className="absolute top-4 right-3 font-mono text-[9.5px] tracking-[0.18em] uppercase text-bone/80">
+                          {clip.durationLabel}
+                        </span>
+                      )}
+                      <div className="absolute bottom-3 left-3 right-3 text-bone">
+                        <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-80">Founder · 1080p</div>
+                        <div className="font-display text-[20px] leading-tight mt-1.5">
+                          {clip.produce}
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Fullscreen player overlay */}
+          {playingIdx !== null && (
             <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(13,13,13,0.0) 0%, rgba(13,13,13,0.0) 38%, rgba(13,13,13,0.78) 100%)",
-              }}
-            />
-            <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-bone">
-              <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-75">
-                Murky wash water
-              </span>
-              <span
-                className={`w-2 h-2 rounded-full ${active ? "bg-vermillion" : "bg-bone/40"}`}
-                aria-hidden="true"
-              />
-            </div>
-            <div className="absolute bottom-3 left-3 right-3 text-bone">
-              <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase opacity-80">
-                {r.produce}
+              className="fixed inset-0 z-50 bg-ink/95 flex items-center justify-center p-4"
+              onClick={() => setPlayingIdx(null)}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Founder clip player"
+            >
+              <button
+                onClick={() => setPlayingIdx(null)}
+                className="absolute top-5 right-5 text-bone/85 hover:text-bone font-mono text-[10.5px] tracking-[0.18em] uppercase"
+              >
+                Close ✕
+              </button>
+              <div
+                className="relative w-full max-w-[960px] aspect-video bg-ink"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {FOUNDER_CLIPS[playingIdx].video ? (
+                  <video
+                    src={FOUNDER_CLIPS[playingIdx].video}
+                    controls
+                    autoPlay
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-bone/80 px-6 text-center">
+                    <img
+                      src={FOUNDER_CLIPS[playingIdx].poster}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover opacity-30"
+                    />
+                    <div className="relative z-10">
+                      <div className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-bone/65 mb-3">
+                        {FOUNDER_CLIPS[playingIdx].produce}
+                      </div>
+                      <p className="font-display text-bone text-[22px] lg:text-[26px] leading-[1.35] max-w-[40ch]">
+                        Video coming &mdash; drop the MP4 into <span className="font-mono text-[14px]">FOUNDER_CLIPS[].video</span>.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="font-display text-[22px] leading-none mt-1">
-                {r.reduction}
-              </div>
             </div>
-          </button>
-        );
-      })}
-    </div>
+          )}
+        </div>
+
+        <div className="mt-10 reveal">
+          <Link to="/estoqi-labs" className="btn-ink">
+            Explore our Findings <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 };
 

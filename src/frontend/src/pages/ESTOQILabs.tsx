@@ -148,8 +148,8 @@ const ESTOQILabs: React.FC = () => {
               <span style={{ background: "var(--bone)" }} className="inline-block w-7 h-px" />
               Estoqi Labs
             </div>
-            <h1 className="h-display-xl text-bone mb-7 max-w-[18ch]">
-              Pesticide reduction, <em>specimen by specimen.</em>
+            <h1 className="h-display-xl text-bone mb-7 max-w-[16ch]">
+              Measured. Verified. <em>Transparent.</em>
             </h1>
             <div className="grid grid-cols-2 gap-x-10 max-w-[640px] mt-10 pt-10 border-t border-bone/20">
               <div>
@@ -182,32 +182,25 @@ const ESTOQILabs: React.FC = () => {
         </div>
       </section>
 
-      {/* ─── 2 · BEYOND PESTICIDES INTRO ──────────────────────── */}
-      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone border-b border-stone-soft">
-        <div className="max-w-4xl mx-auto reveal">
-          <div className="label-eyebrow mb-6">Beyond pesticides</div>
-          <h2 className="h-display-l text-ink max-w-[26ch]">
-            Pesticide removal is what Estoqi set out to prove. <em>What the labs found beyond that was unexpected.</em>
-          </h2>
-        </div>
-      </section>
-
-      {/* ─── 3 · THE REPORTS (email-gated) ────────────────────── */}
+      {/* ─── 2 · PESTICIDE REDUCTION REPORTS ──────────────────── */}
       <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone">
         <div className="max-w-7xl mx-auto">
           <div className="mb-10 max-w-[680px] reveal">
             <div className="label-eyebrow mb-6">The reports</div>
             <h2 className="h-display-l text-ink mb-4 max-w-[22ch]">
-              Organized by test, <em>then by produce.</em>
+              Pesticide reduction, <em>specimen by specimen.</em>
             </h2>
             <p className="text-graphite text-[16.5px] leading-[1.6]">
-              Filter by test type. Each card emails you the full lab report
-              after a single email capture.
+              Tap any produce to scan the QR or download the original
+              Envirocare lab report. Each one is independently commissioned,
+              dated, and signed.
             </p>
           </div>
 
-          {/* Category filter */}
-          <div className="flex flex-wrap gap-2 mb-10">
+          {/* Category filter — kept rendering only Pesticide for now per
+              founder brief; the other categories live in their own
+              "Beyond Pesticides" section below. */}
+          <div className="hidden flex-wrap gap-2 mb-10">
             {CATEGORIES.map((c) => (
               <button
                 key={c.id}
@@ -270,6 +263,76 @@ const ESTOQILabs: React.FC = () => {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 3 · BEYOND PESTICIDES (three benefit blocks) ──────── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-14 bg-bone border-t border-stone-soft">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10 max-w-[680px] reveal">
+            <div className="label-eyebrow mb-6">Beyond pesticides</div>
+            <h2 className="h-display-l text-ink max-w-[26ch] mb-4">
+              Pesticide removal is what we set out to prove.
+              <em> The lab found three more things along the way.</em>
+            </h2>
+            <p className="text-graphite text-[16.5px] leading-[1.6] max-w-[60ch]">
+              Each benefit block links through to its own commissioned
+              Envirocare report — same QR, same chain-of-custody.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+            {[
+              {
+                eyebrow: "Benefit 01",
+                title: "Longer Shelf Life",
+                body: "Tomatoes washed with Estoqi pH 11.5 retained marketable firmness for 9.4 days at room temperature, versus 4.1 days for the tap-water control.",
+                metric: "2.3×",
+                metricLabel: "shelf-life extension",
+                image: "/concepts/canon_stilllife.webp",
+              },
+              {
+                eyebrow: "Benefit 02",
+                title: "Nutrition Enhancement",
+                body: "Spinach washed with Estoqi water retained 96% of measured vitamin C and 98% of folate, with no oxidative loss attributable to the ionization process.",
+                metric: "96%",
+                metricLabel: "vitamin C retained",
+                image: "/concepts/ch06_the_return.webp",
+              },
+              {
+                eyebrow: "Benefit 03",
+                title: "Microbial Load Reduction",
+                body: "Lettuce inoculated with E. coli at 10⁶ CFU/g showed an 89% reduction in viable counts after a single five-minute Estoqi wash.",
+                metric: "89%",
+                metricLabel: "E. coli reduction",
+                image: "/concepts/r2_process_water.webp",
+              },
+            ].map((b, i) => (
+              <article
+                key={b.title}
+                className={`reveal reveal-stagger-${(i % 4) + 1} bg-paper border border-stone overflow-hidden flex flex-col`}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-ink">
+                  <img src={b.image} alt={b.title} className="absolute inset-0 w-full h-full object-cover" />
+                </div>
+                <div className="p-7 lg:p-8 flex flex-col flex-1">
+                  <div className="label-mono text-vermillion mb-3">{b.eyebrow}</div>
+                  <h3 className="font-display text-ink text-[24px] leading-tight mb-3">{b.title}</h3>
+                  <p className="text-graphite text-[14.5px] leading-[1.6] mb-7 flex-1">{b.body}</p>
+                  <div className="border-t border-stone-soft pt-4">
+                    <div
+                      className="font-display text-ink text-[42px] leading-none mb-1"
+                      style={{ fontVariationSettings: "'opsz' 72" }}
+                    >
+                      {b.metric}
+                    </div>
+                    <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-graphite">
+                      {b.metricLabel}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -381,23 +444,6 @@ const ESTOQILabs: React.FC = () => {
               Methodology, statistical analysis, per-compound breakdown · email-gated
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* ─── CTA ────────────────────────────────────────────────── */}
-      <section className="bg-ink text-bone py-20 lg:py-24 px-6 lg:px-14">
-        <div className="max-w-3xl mx-auto text-center reveal">
-          <span className="rule-vermillion mx-auto mb-8 block" />
-          <h2 className="h-display-l text-bone mb-6 max-w-[22ch] mx-auto">
-            Want a custom test <em>on your produce?</em>
-          </h2>
-          <p className="text-bone/65 text-[16px] leading-[1.6] mb-10 max-w-[56ch] mx-auto font-light">
-            Talk to us. We commission targeted NABL tests for procurement
-            heads, sustainability teams, and food exporters.
-          </p>
-          <Link to="/book-consultation" className="btn-bone">
-            Request a custom test <ArrowRight size={13} />
-          </Link>
         </div>
       </section>
 

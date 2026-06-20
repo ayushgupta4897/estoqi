@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Minus, Plus } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import VideoPlaceholder from "../components/VideoPlaceholder";
 import { useScrollAnimation } from "../hooks/useIntersectionObserver";
 
 /* =====================================================================
@@ -18,12 +17,16 @@ import { useScrollAnimation } from "../hooks/useIntersectionObserver";
      8 End Banner
    ===================================================================== */
 
+/* `amc` was previously rendered as "+ ₹4,500/yr AMC · ₹99/mo consumables"
+ * under the price; the founder asked for it gone from every tier. The
+ * field is kept on the interface as optional in case the costs need to
+ * surface in a future BOQ view, but no tier sets it any more. */
 interface Plan {
   eyebrow: string;
   name: string;
   description: string;
   price: string;
-  amc: string;
+  amc?: string;
   features: string[];
   featured?: boolean;
 }
@@ -34,7 +37,6 @@ const PLANS: Plan[] = [
     description:
       "pH 9.5 hydrogen-rich drinking water at every tap. For families who want better water at the source.",
     price: "₹49,999",
-    amc: "+ ₹4,500/yr AMC · ₹99/mo consumables",
     features: [
       "pH 9.5 drinking stream",
       "1,200 ppb dissolved hydrogen",
@@ -48,7 +50,6 @@ const PLANS: Plan[] = [
     description:
       "pH 11.5 produce wash at the kitchen sink. Designed for every fruit, vegetable, and grain.",
     price: "₹49,999",
-    amc: "+ ₹4,500/yr AMC · ₹99/mo consumables",
     features: [
       "pH 11.5 wash stream",
       "Up to 99% pesticide reduction",
@@ -62,7 +63,6 @@ const PLANS: Plan[] = [
     description:
       "Both outputs from a single counter-side unit. The full Estoqi experience, every meal, every day.",
     price: "₹89,999",
-    amc: "+ ₹4,500/yr AMC · ₹99/mo consumables",
     features: [
       "pH 9.5 drinking + pH 11.5 wash",
       "Two dedicated outlets",
@@ -96,24 +96,31 @@ const INSTALL_STEPS = [
   },
 ];
 
-const TESTIMONIALS = [
+interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+  meta?: string;
+}
+const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "We have been using Estoqi for six months. The difference in how our vegetables look after washing is remarkable, and my family actually enjoys drinking water again.",
-    name: "Priya S.",
-    location: "Bengaluru",
+      "I've dealt with poor gut health for most of my life. Since switching to Estoqi water, the constipation and acidity I lived with simply aren't part of my days anymore.",
+    name: "Amit Desai",
+    role: "Founder, GiftsToIndia24x7.com",
+    meta: "Age 46",
   },
   {
     quote:
-      "I was sceptical about ionized water, but the NABL-certified test results convinced me. Installation was seamless, and the team was professional throughout.",
-    name: "Rahul M.",
-    location: "Mumbai",
+      "My father managed chronic constipation for over forty years, on daily medication and laxatives. Since we started with Estoqi water, he needs them maybe once a week, if that. The change has been hard to believe.",
+    name: "Ajay Sharma",
+    role: "HoReCa supplier · 20+ years",
   },
   {
     quote:
-      "The dual-stream system is elegant in its simplicity. One machine, two purposes. It fits at our counter and requires almost no maintenance.",
-    name: "Ananya K.",
-    location: "Hyderabad",
+      "I couldn't believe my eyes at the demo. They pulled pesticides out of vegetables I'd already washed with baking soda and refrigerated. So I tested them — I ordered random produce off quick-commerce apps, washed it myself, and handed it over. They removed residue from that too. This product belongs in every Indian home. Best wishes to the team for solving a real problem.",
+    name: "Atul Shah",
+    role: "Owner, a leading retail store · Pune",
   },
 ];
 
@@ -141,7 +148,6 @@ const FAQS = [
 ];
 
 const ForHomes: React.FC = () => {
-  const [demoOpen, setDemoOpen] = useState(false);
   useScrollAnimation();
 
   return (
@@ -170,7 +176,7 @@ const ForHomes: React.FC = () => {
               Your home. <em>Elevated.</em>
             </h1>
             <p className="font-display text-bone/80 text-[20px] lg:text-[24px] leading-[1.45] max-w-[58ch] font-light mb-8">
-              Estoqi installs at your kitchen counter. Two outlets, two
+              Estoqi installs at your kitchen counter. Two outputs, two
               streams. One for washing your family's food, one for drinking.
               Used by every family member, every meal.
             </p>
@@ -200,21 +206,14 @@ const ForHomes: React.FC = () => {
           </div>
           <div className="lg:col-span-6 reveal reveal-stagger-2">
             <div className="label-eyebrow mb-6">The machine</div>
-            <h2 className="h-display-l text-ink mb-6">
-              Countertop sized. <em>Lab-grade inside.</em>
+            <h2 className="h-display-l text-ink mb-6 max-w-[18ch]">
+              Countertop sized,{" "}
+              <em>Lab-grade inside.</em>
             </h2>
-            <p className="text-graphite text-[16.5px] leading-[1.65] mb-4 max-w-[48ch]">
+            <p className="text-graphite text-[16.5px] leading-[1.65] max-w-[48ch]">
               Surgical-grade titanium electrodes, food-grade tubing, a single
               compact chamber. Sized to fit at your kitchen counter without
               taking it over.
-            </p>
-            <p className="text-graphite text-[16.5px] leading-[1.65] mb-4 max-w-[48ch]">
-              One unit produces both streams in parallel. There are no
-              consumable filters in the water path, only annual servicing.
-            </p>
-            <p className="text-graphite text-[16.5px] leading-[1.65] max-w-[48ch]">
-              You turn one tap and you get drinking water. You turn the other
-              and you get the wash.
             </p>
           </div>
         </div>
@@ -226,7 +225,7 @@ const ForHomes: React.FC = () => {
           <div className="mb-14 max-w-[680px] reveal">
             <div className="label-eyebrow mb-6">Choose your Estoqi</div>
             <h2 className="h-display-l text-ink mb-6">
-              Three plans. <em>One counter-side unit.</em>
+              Three plans.
             </h2>
             <p className="text-graphite text-[17px] leading-[1.6]">
               All plans use the same surgical-grade titanium chamber. The
@@ -237,33 +236,6 @@ const ForHomes: React.FC = () => {
             {PLANS.map((p, i) => (
               <PlanCard key={p.name} plan={p} index={i} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 4 · VIRTUAL DEMO ────────────────────────────────── */}
-      <section className="py-24 lg:py-32 px-6 lg:px-14 bg-bone">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-5 reveal">
-            <div className="label-eyebrow mb-6">Virtual demo</div>
-            <h2 className="h-display-l text-ink mb-6">
-              See it before <em>you install it.</em>
-            </h2>
-            <p className="text-graphite text-[17px] leading-[1.6] mb-8">
-              A guided ninety-second walkthrough of an Estoqi home install,
-              from site assessment to first wash. Watch it once and decide.
-            </p>
-            <button type="button" onClick={() => setDemoOpen(true)} className="btn-ink">
-              Watch the demo <ArrowRight size={13} />
-            </button>
-          </div>
-          <div className="lg:col-span-7 reveal reveal-stagger-2">
-            <VideoPlaceholder
-              label="Estoqi · Home install walkthrough"
-              overlayText="90 seconds"
-              onClick={() => setDemoOpen(true)}
-              className="rounded-sm"
-            />
           </div>
         </div>
       </section>
@@ -317,7 +289,10 @@ const ForHomes: React.FC = () => {
                 </blockquote>
                 <figcaption className="border-t border-stone-soft pt-4">
                   <div className="label-mono text-ink">{t.name}</div>
-                  <div className="font-mono text-[10.5px] text-graphite mt-1">{t.location}</div>
+                  <div className="font-mono text-[10.5px] text-graphite mt-1">{t.role}</div>
+                  {t.meta && (
+                    <div className="font-mono text-[10px] text-graphite/65 mt-1">{t.meta}</div>
+                  )}
                 </figcaption>
               </figure>
             ))}
@@ -356,32 +331,6 @@ const ForHomes: React.FC = () => {
         </div>
       </section>
 
-      {demoOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-ink/90 flex items-center justify-center p-6"
-          onClick={() => setDemoOpen(false)}
-        >
-          <button
-            type="button"
-            className="absolute top-6 right-6 text-bone label-mono"
-            onClick={() => setDemoOpen(false)}
-          >
-            Close ×
-          </button>
-          <div className="max-w-4xl w-full bg-paper p-12 text-center">
-            <p className="label-mono text-graphite mb-4">Video forthcoming</p>
-            <h3 className="font-display text-ink text-[28px] mb-3">
-              The home install walkthrough is in production.
-            </h3>
-            <p className="text-graphite text-[15px]">
-              Leave us your number on the consultation form and we will send
-              the walkthrough as soon as it ships.
-            </p>
-          </div>
-        </div>
-      )}
     </main>
   );
 };
@@ -414,9 +363,12 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, index }) => (
     >
       {plan.price}
     </div>
-    <div className={`font-mono text-[10.5px] mb-7 ${plan.featured ? "text-bone/60" : "text-graphite"}`}>
-      {plan.amc}
-    </div>
+    {plan.amc && (
+      <div className={`font-mono text-[10.5px] mb-7 ${plan.featured ? "text-bone/60" : "text-graphite"}`}>
+        {plan.amc}
+      </div>
+    )}
+    <div className={plan.amc ? "" : "mb-7"} />
     <ul className={`space-y-2 mb-8 ${plan.featured ? "text-bone/80" : "text-graphite"}`}>
       {plan.features.map((f) => (
         <li key={f} className="text-[14px] leading-[1.5] flex gap-2 items-baseline">
